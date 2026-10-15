@@ -41,12 +41,24 @@ python tools/gen_audio.py     # escreve assets/audio/*.wav
 ## Build Android
 
 ```bash
-flet build apk
+flet build apk     # build de release; sai em build/apk/fluxo.apk
 ```
 
 Precisa de JDK 17 e Android SDK. O workflow `.github/workflows/android.yml` faz isso no
 GitHub Actions e publica o APK como asset de uma Release, então dá para compilar sem ter
 nada instalado.
+
+Sem segredos no repositório, o APK de release sai **assinado com a chave de depuração** —
+instala no aparelho normalmente, mas não sobe na Play Store. Para assinar de verdade, crie
+um keystore e grave quatro secrets no repositório: `ANDROID_KEYSTORE_BASE64`,
+`ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` e `ANDROID_KEY_PASSWORD`. Guarde o
+keystore fora do GitHub: sem ele não dá para publicar atualização do mesmo app.
+
+```bash
+keytool -genkeypair -v -keystore fluxo.keystore -alias fluxo \
+  -keyalg RSA -keysize 2048 -validity 10000
+base64 -w0 fluxo.keystore   # vai no ANDROID_KEYSTORE_BASE64
+```
 
 ## O que **não** foi portado (e por quê)
 

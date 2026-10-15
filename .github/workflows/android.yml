@@ -44,12 +44,36 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build do APK
-        run: flet build apk -v
+      - name: Preparar keystore (opcional)
+        id: keystore
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KS" ]; then
+            printf '%s' "$KS" | base64 -d > "$RUNNER_TEMP/fluxo.keystore"
+            echo "path=$RUNNER_TEMP/fluxo.keystore" >> "$GITHUB_OUTPUT"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::APK sera assinado com a chave de release do projeto"
+          else
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Sem ANDROID_KEYSTORE_BASE64: APK de release assinado com a chave de depuracao"
+          fi
+
+      - name: Build do APK (release)
+        run: |
+          if [ "${{ steps.keystore.outputs.signed }}" = "true" ]; then
+            flet build apk \
+              --android-signing-key-store "${{ steps.keystore.outputs.path }}" \
+              --android-signing-key-store-password "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
+              --android-signing-key-alias "${{ secrets.ANDROID_KEY_ALIAS }}" \
+              --android-signing-key-password "${{ secrets.ANDROID_KEY_PASSWORD }}"
+          else
+            flet build apk
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
-          name: fluxo-apk
+          name: fluxo-release-apk
           path: build/apk/*.apk
           if-no-files-found: error
 
@@ -61,7 +85,7 @@ jobs:
           set -euo pipefail
           API="${{ github.api_url }}/repos/${{ github.repository }}"
           APK=$(ls build/apk/*.apk | head -1)
-          TAG="fluxo-py-debug-apk"
+          TAG="fluxo-apk"
 
           if [ "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $GH_TOKEN" "$API/releases/tags/$TAG")" = "200" ]; then
             RID=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "$API/releases/tags/$TAG" | jq -r '.id')
@@ -69,15 +93,15 @@ jobs:
             curl -s -X DELETE -H "Authorization: Bearer $GH_TOKEN" "$API/git/refs/tags/$TAG" || true
           fi
 
-          BODY="APK gerado pelo build #${{ github.run_number }} do commit ${{ github.sha }} (Flet + Python).
+          BODY="APK de release gerado pelo build #${{ github.run_number }} do commit ${{ github.sha }} (Flet + Python).
           Log: $RUN_URL
 
-          Assinado com chave de depuracao: o Android pede confirmacao de fonte desconhecida na instalacao."
+          Modo release do Flutter. Sem keystore no projeto, a assinatura e de depuracao: o Android pede confirmacao de fonte desconhecida."
 
           UPLOAD=$(curl -sf -X POST \
             -H "Authorization: Bearer $GH_TOKEN" -H "Content-Type: application/json" \
-            -d "$(jq -n --arg tag "$TAG" --arg name "Fluxo (Python APK)" --arg body "$BODY" \
-                  '{tag_name:$tag, name:$name, body:$body, prerelease:true}')" \
+            -d "$(jq -n --arg tag "$TAG" --arg name "Fluxo (Android, build de release)" --arg body "$BODY" \
+                  '{tag_name:$tag, name:$name, body:$body, prerelease:false}')" \
             "$API/releases" | jq -r '.upload_url' | sed 's/{.*//')
 
           curl -sf -X POST \
