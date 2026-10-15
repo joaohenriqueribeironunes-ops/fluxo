@@ -1,0 +1,17 @@
+[project]
+name = "fluxo"
+version = "1.0.0"
+description = "Fluxo - foco, som e estimulo sensorial para cerebro TEA/TDAH (local-first)"
+requires-python = ">=3.10"
+dependencies = ["flet==1.0.4", "flet-audio==1.0.4"]
+
+[tool.flet]
+org = "dev.fluxo"
+product = "Fluxo"
+company = "Fluxo contributors"
+copyright = "2026 Fluxo contributors"
+
+[tool.flet.web]
+pwa_short_name = "Fluxo"
+pwa_background_color = "#11201b"
+pwa_theme_color = "#34d399"

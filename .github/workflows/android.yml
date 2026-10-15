@@ -1,0 +1,88 @@
+name: Android
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Instalar pacotes do Android SDK
+        run: |
+          export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          CMDLINE=$(ls -d "$ANDROID_HOME/cmdline-tools"/* 2>/dev/null | sort -V | tail -1)
+          if [ -z "$CMDLINE" ]; then
+            curl -fsSLo /tmp/cmdline.zip \
+              https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+            rm -rf /tmp/cmdline && unzip -q /tmp/cmdline.zip -d /tmp/cmdline
+            mkdir -p "$ANDROID_HOME/cmdline-tools/latest"
+            cp -a /tmp/cmdline/cmdline-tools/. "$ANDROID_HOME/cmdline-tools/latest/"
+            CMDLINE="$ANDROID_HOME/cmdline-tools/latest"
+          fi
+          yes | "$CMDLINE/bin/sdkmanager" --licenses > /dev/null || true
+          "$CMDLINE/bin/sdkmanager" \
+            "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Instalar dependencias Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build do APK
+        run: flet build apk -v
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fluxo-apk
+          path: build/apk/*.apk
+          if-no-files-found: error
+
+      - name: Publicar APK na Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          API="${{ github.api_url }}/repos/${{ github.repository }}"
+          APK=$(ls build/apk/*.apk | head -1)
+          TAG="fluxo-py-debug-apk"
+
+          if [ "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $GH_TOKEN" "$API/releases/tags/$TAG")" = "200" ]; then
+            RID=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "$API/releases/tags/$TAG" | jq -r '.id')
+            curl -sf -X DELETE -H "Authorization: Bearer $GH_TOKEN" "$API/releases/$RID"
+            curl -s -X DELETE -H "Authorization: Bearer $GH_TOKEN" "$API/git/refs/tags/$TAG" || true
+          fi
+
+          BODY="APK gerado pelo build #${{ github.run_number }} do commit ${{ github.sha }} (Flet + Python).
+          Log: $RUN_URL
+
+          Assinado com chave de depuracao: o Android pede confirmacao de fonte desconhecida na instalacao."
+
+          UPLOAD=$(curl -sf -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" -H "Content-Type: application/json" \
+            -d "$(jq -n --arg tag "$TAG" --arg name "Fluxo (Python APK)" --arg body "$BODY" \
+                  '{tag_name:$tag, name:$name, body:$body, prerelease:true}')" \
+            "$API/releases" | jq -r '.upload_url' | sed 's/{.*//')
+
+          curl -sf -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/vnd.android.package-archive" \
+            --data-binary "@$APK" "$UPLOAD?name=Fluxo.apk" > /dev/null
+
+          echo "::notice::APK publicado em $API/releases/tag/$TAG"

@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+build/
+.flet/
+.flet-run.log
+*.sqlite3
+tracks/
