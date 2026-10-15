@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -68,13 +68,13 @@ jobs:
       - name: Build do APK (release)
         run: |
           if [ "${{ steps.keystore.outputs.signed }}" = "true" ]; then
-            flet build apk \
+            flet build apk --yes \
               --android-signing-key-store "${{ steps.keystore.outputs.path }}" \
               --android-signing-key-store-password "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
               --android-signing-key-alias "${{ secrets.ANDROID_KEY_ALIAS }}" \
               --android-signing-key-password "${{ secrets.ANDROID_KEY_PASSWORD }}"
           else
-            flet build apk
+            flet build apk --yes
           fi
 
       - uses: actions/upload-artifact@v4
