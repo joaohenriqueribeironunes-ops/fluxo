@@ -3,6 +3,26 @@
 App React/TypeScript para mentes TEA/TDAH: foco, regulação sensorial e captura de ideias.
 Todo o processamento (áudio, análise, acervo) acontece **no aparelho**, sem IA e sem enviar dados.
 
+## 📲 Instalar no celular (Android)
+
+Baixe o APK direto no aparelho — não precisa de conta nem de login:
+
+**https://github.com/joaohenriqueribeironunes-ops/fluxo/releases/latest/download/fluxo-release.apk**
+
+1. Abra o link **no próprio celular** e baixe o `fluxo-release.apk`.
+2. Toque no arquivo baixado. O Android vai pedir para autorizar a instalação
+   de apps desta fonte (*Configurações → Instalar apps desconhecidos*).
+   Isso é normal para apps fora da Play Store.
+3. Abra o **Fluxo**. Na primeira vez que usar a **Alternância** e os
+   **lembretes**, o Android pede permissão de microfone e de notificação.
+
+> O APK é assinado com a chave de depuração (`CN=Android Debug`), suficiente
+> para uso próprio. Se você instalar uma versão nova por cima de uma antiga e
+> o Android reclamar de assinatura diferente, desinstale a anterior primeiro.
+
+O app funciona **offline**. A única função que usa internet é a busca na
+Wikipedia dentro de **Ideias**, e só quando você pede.
+
 ## 🚀 Rodar localmente
 
 ```bash
