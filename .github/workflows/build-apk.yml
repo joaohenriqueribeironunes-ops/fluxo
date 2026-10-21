@@ -32,11 +32,14 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Instalar plataforma e build-tools
-        run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+      # O runner do GitHub ja traz Android SDK 36 + build-tools 36.0.0 e o
+      # ANDROID_HOME configurado; nao precisamos do setup-android (que baixa
+      # cmdline-tools 16.0 e quebra no '--licenses').
+      - name: Conferir Android SDK disponivel
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME/platforms"
+          ls "$ANDROID_HOME/build-tools"
 
       # O lockfile fica dessincronizado com os pacotes do Capacitor; 'npm install'
       # reconcilia em vez de abortar como o 'npm ci' faz.
@@ -48,6 +51,21 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+
+      # O runner nao tem ~/.android/debug.keystore; sem ela o signingConfig de
+      # release falha. Geramos uma com keytool (mesmos dados da keystore padrao).
+      - name: Gerar debug keystore
+        run: |
+          mkdir -p "$HOME/.android"
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -v \
+              -keystore "$HOME/.android/debug.keystore" \
+              -storepass android -keypass android \
+              -alias androiddebugkey \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          ls -l "$HOME/.android/debug.keystore"
 
       - name: Build APK (debug)
         run: ./gradlew assembleDebug --no-daemon
