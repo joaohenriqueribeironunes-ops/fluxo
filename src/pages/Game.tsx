@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Play, RotateCcw, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { loadStored, saveStored } from '@/lib/storage'
 
 const PADS = [
   { color: '#22c55e', glow: '#bbf7d0', freq: 329.63 },
@@ -56,7 +57,7 @@ export function Game() {
   useEffect(() => () => clearTimers(), [clearTimers])
 
   useEffect(() => {
-    const stored = parseInt(localStorage.getItem(BEST_KEY) || '0', 10)
+    const stored = parseInt(loadStored<string>(BEST_KEY, '0'), 10)
     setBest(Number.isNaN(stored) ? 0 : stored)
   }, [])
 
@@ -103,7 +104,7 @@ export function Game() {
         setRound(size)
         if (size > best) {
           setBest(size)
-          localStorage.setItem(BEST_KEY, String(size))
+          saveStored(BEST_KEY, String(size))
         }
         setPhase('playing')
         setMessage('Correto! Próxima rodada...')

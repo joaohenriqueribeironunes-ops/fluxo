@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Moon, Sun, Cloud, Bell, Mic, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { loadStored, saveStored } from '@/lib/storage'
 
 const THEME_KEY = 'fluxo_theme'
 const ADAPTIVE_KEY = 'fluxo_adaptive'
@@ -26,14 +27,14 @@ export function Settings() {
   const analyserRef = useRef<AnalyserNode | null>(null)
 
   useEffect(() => {
-    setTheme((localStorage.getItem(THEME_KEY) as Theme) || 'escuro')
-    setAdaptive(localStorage.getItem(ADAPTIVE_KEY) === 'on')
+    setTheme(loadStored<Theme>(THEME_KEY, 'escuro'))
+    setAdaptive(loadStored<string>(ADAPTIVE_KEY, 'off') === 'on')
     if ('Notification' in window) setNotifPermission(Notification.permission)
   }, [])
 
   const pickTheme = (next: Theme) => {
     setTheme(next)
-    localStorage.setItem(THEME_KEY, next)
+    saveStored(THEME_KEY, next)
     document.documentElement.dataset.theme = next
   }
 
@@ -61,7 +62,11 @@ export function Settings() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       streamRef.current = stream
-      const ctx = new AudioContext()
+      // Alguns WebViews só expõem o construtor com prefixo.
+      const Ctor =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      const ctx = new Ctor()
       const source = ctx.createMediaStreamSource(stream)
       const analyser = ctx.createAnalyser()
       analyser.fftSize = 512
@@ -79,9 +84,12 @@ export function Settings() {
       tick()
 
       setAdaptive(true)
-      localStorage.setItem(ADAPTIVE_KEY, 'on')
+      saveStored(ADAPTIVE_KEY, 'on')
     } catch {
-      setMicError('Microfone indisponível. Autorize o microfone para usar a Alternância.')
+      // No WebView do Android o microfone exige a permissão RECORD_AUDIO do
+      // próprio app (declarada no AndroidManifest). Sem ela, ou se o usuário
+      // negar o diálogo, cai aqui.
+      setMicError('Microfone indisponível. Autorize o microfone nas permissões do app.')
     } finally {
       setLoadingMic(false)
     }

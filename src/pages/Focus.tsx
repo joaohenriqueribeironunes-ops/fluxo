@@ -16,6 +16,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { loadStored, saveStored } from '@/lib/storage'
 import {
   BINAURAL_PRESETS,
   NOISE_PRESETS,
@@ -348,7 +349,11 @@ function Alternance() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       streamRef.current = stream
-      const ctx = new AudioContext()
+      // Alguns WebViews só expõem o construtor com prefixo.
+      const Ctor =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      const ctx = new Ctor()
       const source = ctx.createMediaStreamSource(stream)
       const analyser = ctx.createAnalyser()
       analyser.fftSize = 512
@@ -364,7 +369,7 @@ function Alternance() {
       tick()
       setOn(true)
     } catch {
-      setError('Microfone indisponível. Autorize o microfone para usar a Alternância.')
+      setError('Microfone indisponível. Autorize o microfone nas permissões do app.')
     } finally {
       setLoading(false)
     }
@@ -585,19 +590,16 @@ function Appointments() {
   const [title, setTitle] = useState('')
   const [datetime, setDatetime] = useState('')
   const [remind, setRemind] = useState(REMIND_OPTIONS[0])
+  const [saveError, setSaveError] = useState('')
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(APPOINTMENTS_KEY)
-      if (raw) setItems(JSON.parse(raw) as Appointment[])
-    } catch {
-      /* sem dados salvos */
-    }
+    setItems(loadStored<Appointment[]>(APPOINTMENTS_KEY, []))
   }, [])
 
   const persist = (next: Appointment[]) => {
     setItems(next)
-    localStorage.setItem(APPOINTMENTS_KEY, JSON.stringify(next))
+    const res = saveStored(APPOINTMENTS_KEY, next)
+    if (!res.ok) setSaveError(res.error ?? 'Não foi possível salvar.')
   }
 
   const add = () => {
@@ -619,6 +621,12 @@ function Appointments() {
         <BellRing size={18} className="text-emerald-200" aria-hidden="true" />
         <h3 className="text-foreground/90 font-medium">Meus compromissos</h3>
       </div>
+
+      {saveError && (
+        <p role="alert" className="text-rose-300 text-xs mb-3">
+          {saveError}
+        </p>
+      )}
 
       <div className="space-y-3">
         <input

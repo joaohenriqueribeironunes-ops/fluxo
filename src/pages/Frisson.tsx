@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { BINAURAL_PRESETS } from '@/lib/audio'
+import { loadStored, saveStored } from '@/lib/storage'
 
 const LIBRARY_KEY = 'fluxo_music'
 const LOOP_KEY = 'fluxo_loop_mode'
@@ -37,12 +38,7 @@ const LOOP_ICONS: Record<LoopMode, typeof Repeat> = {
 }
 
 function loadTracks(): Track[] {
-  try {
-    const raw = localStorage.getItem(LIBRARY_KEY)
-    return raw ? (JSON.parse(raw) as Track[]) : []
-  } catch {
-    return []
-  }
+  return loadStored<Track[]>(LIBRARY_KEY, [])
 }
 
 /** Reinterpreta as frequências: aplica filtros em cascata ao áudio. */
@@ -93,6 +89,7 @@ export function Frisson() {
   const [volume, setVolume] = useState(0.7)
   const [adding, setAdding] = useState(false)
   const [reinterpreting, setReinterpreting] = useState(false)
+  const [storageError, setStorageError] = useState('')
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const ctxRef = useRef<AudioContext | null>(null)
@@ -130,7 +127,8 @@ export function Frisson() {
 
   const persist = (next: Track[]) => {
     setTracks(next)
-    localStorage.setItem(LIBRARY_KEY, JSON.stringify(next))
+    const res = saveStored(LIBRARY_KEY, next)
+    if (!res.ok) setStorageError(res.error ?? 'Não foi possível salvar.')
   }
 
   const applyPreset = (key: string | null) => {
@@ -202,7 +200,9 @@ export function Frisson() {
 
     if (!audioRef.current) {
       const audio = new Audio()
-      audio.crossOrigin = 'anonymous'
+      // Sem crossOrigin: as faixas são data URLs locais (lidas do aparelho),
+      // não vêm de outra origem. Definir 'anonymous' aqui faz o WebView
+      // recusar o carregamento e o play() falha silenciosamente.
       audio.onended = () => {
         setPlaying(false)
         if (loop === 'one') {
@@ -265,7 +265,7 @@ export function Frisson() {
     const order: LoopMode[] = ['off', 'all', 'one']
     const next = order[(order.indexOf(loop) + 1) % order.length]
     setLoop(next)
-    localStorage.setItem(LOOP_KEY, next)
+    saveStored(LOOP_KEY, next)
     if (audioRef.current) audioRef.current.loop = next === 'one'
   }
 
@@ -275,6 +275,15 @@ export function Frisson() {
 
   return (
     <div className="space-y-4">
+      {storageError && (
+        <div
+          role="alert"
+          className="rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-200"
+        >
+          {storageError}
+        </div>
+      )}
+
       {/* Player */}
       {activeTrack && (
         <div className="glass rounded-3xl p-5">

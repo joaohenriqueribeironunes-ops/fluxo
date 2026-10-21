@@ -38,4 +38,20 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- A Alternância (src/pages/Focus.tsx) mede o barulho do ambiente pelo
+         microfone. Sem estas permissões o getUserMedia do WebView falha sempre:
+         o BridgeWebChromeClient do Capacitor pede RECORD_AUDIO e
+         MODIFY_AUDIO_SETTINGS juntas para liberar AUDIO_CAPTURE. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Lembretes de fim de bloco e de compromissos (src/pages/Focus.tsx).
+         Necessária no Android 13+ para o usuário poder autorizar. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- O WebView só entrega getUserMedia a páginas "seguras". O Capacitor
+         serve o app em https://localhost, então declaramos isso como
+         confiável para o microfone e a câmera não serem bloqueados. -->
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
 </manifest>

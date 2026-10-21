@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Plus, Search, X, Trash2, BookOpen, Lightbulb, ArrowRight, LoaderCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { loadStored, saveStored } from '@/lib/storage'
 
 interface Idea {
   id: string
@@ -74,12 +75,7 @@ function analyzeIdea(content: string, articles: Article[]) {
 }
 
 function load<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key)
-    return raw ? (JSON.parse(raw) as T) : fallback
-  } catch {
-    return fallback
-  }
+  return loadStored(key, fallback)
 }
 
 /** Busca artigos na Wikipedia (API pública) e devolve o texto. */
@@ -117,6 +113,7 @@ export function Ideas() {
   const [searchError, setSearchError] = useState('')
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null)
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
+  const [storageError, setStorageError] = useState('')
 
   useEffect(() => {
     setIdeas(load<Idea[]>(IDEAS_KEY, []))
@@ -125,12 +122,14 @@ export function Ideas() {
 
   const persistIdeas = (next: Idea[]) => {
     setIdeas(next)
-    localStorage.setItem(IDEAS_KEY, JSON.stringify(next))
+    const res = saveStored(IDEAS_KEY, next)
+    if (!res.ok) setStorageError(res.error ?? 'Não foi possível salvar.')
   }
 
   const persistArticles = (next: Article[]) => {
     setArticles(next)
-    localStorage.setItem(ARTICLES_KEY, JSON.stringify(next))
+    const res = saveStored(ARTICLES_KEY, next)
+    if (!res.ok) setStorageError(res.error ?? 'Não foi possível salvar.')
   }
 
   const saveIdea = () => {
@@ -192,6 +191,15 @@ export function Ideas() {
 
   return (
     <div className="space-y-5">
+      {storageError && (
+        <div
+          role="alert"
+          className="rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-200"
+        >
+          {storageError}
+        </div>
+      )}
+
       {/* Captura de ideias */}
       <div className="glass rounded-3xl p-5">
         <div className="flex items-center justify-between gap-2 mb-3">
