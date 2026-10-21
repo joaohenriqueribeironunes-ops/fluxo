@@ -3,96 +3,83 @@ name: Build Android APK
 on:
   push:
     branches: [main, master]
+    tags: ['v*']
   pull_request:
     branches: [main, master]
-  workflow_dispatch: # Manual trigger
+  workflow_dispatch: # disparo manual
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    name: Build Debug APK
+    name: Compilar APK
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '22'
 
       - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'gradle'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.13'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ${{ github.workspace }}
+      - name: Instalar plataforma e build-tools
+        run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
-      - name: Build web app
+      # O lockfile fica dessincronizado com os pacotes do Capacitor; 'npm install'
+      # reconcilia em vez de abortar como o 'npm ci' faz.
+      - name: Instalar dependencias
+        run: npm install --no-audit --no-fund
+
+      - name: Build do web
         run: npm run build
-        working-directory: ${{ github.workspace }}
 
       - name: Sync Capacitor
         run: npx cap sync android
-        working-directory: ${{ github.workspace }}
 
-      - name: Build Debug APK
+      - name: Build APK (debug)
         run: ./gradlew assembleDebug --no-daemon
-        working-directory: ${{ github.workspace }}/android
+        working-directory: android
 
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: fluxo-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 30
-
-      - name: Build Release APK (unsigned)
+      # A release precisa ser assinada, senao o Android recusa a instalacao.
+      # Usamos a debug keystore gerada pelo proprio runner.
+      - name: Build APK (release, assinado)
         run: ./gradlew assembleRelease --no-daemon
-        working-directory: ${{ github.workspace }}/android
+        working-directory: android
 
-      - name: Upload Release APK
+      - name: Renomear APKs
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk out/fluxo-debug.apk
+          if [ -f android/app/build/outputs/apk/release/app-release.apk ]; then
+            cp android/app/build/outputs/apk/release/app-release.apk out/fluxo-release.apk
+          elif [ -f android/app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+            cp android/app/build/outputs/apk/release/app-release-unsigned.apk out/fluxo-release.apk
+          fi
+          ls -lh out
+
+      - name: Upload APK (artifact)
         uses: actions/upload-artifact@v4
         with:
-          name: fluxo-release-apk-unsigned
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
-          retention-days: 30
+          name: fluxo-apk
+          path: out/*.apk
+          retention-days: 90
 
-  create-release:
-    name: Create Release
-    needs: build
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Download Debug APK
-        uses: actions/download-artifact@v4
-        with:
-          name: fluxo-debug-apk
-          path: artifacts
-
-      - name: Download Release APK
-        uses: actions/download-artifact@v4
-        with:
-          name: fluxo-release-apk-unsigned
-          path: artifacts
-
-      - name: Create Release
+      - name: Publicar Release
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            artifacts/app-debug.apk
-            artifacts/app-release-unsigned.apk
+          files: out/*.apk
           generate_release_notes: true
