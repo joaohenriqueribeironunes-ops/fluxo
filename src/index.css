@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Fluxo — tema claro-sensitivo (glassmorphism) */
+    --background: 158 19% 10%;
+    --foreground: 150 20% 96%;
+    --card: 158 18% 13%;
+    --card-foreground: 150 20% 96%;
+    --popover: 158 18% 13%;
+    --popover-foreground: 150 20% 96%;
+    --primary: 150 30% 85%;
+    --primary-foreground: 158 30% 10%;
+    --secondary: 158 14% 18%;
+    --secondary-foreground: 150 20% 96%;
+    --muted: 158 14% 18%;
+    --muted-foreground: 150 10% 70%;
+    --accent: 158 14% 20%;
+    --accent-foreground: 150 20% 96%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 150 20% 96%;
+    --border: 150 15% 25%;
+    --input: 150 15% 22%;
+    --ring: 150 30% 70%;
+    --radius: 0.5rem;
+    --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol", "Noto Color Emoji";
+    --font-heading: ui-sans-serif, system-ui, sans-serif;
+    --font-body: ui-sans-serif, system-ui, sans-serif;
+    --font-display: ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  /* Fundo do app — gradiente radial esverdeado */
+  .app-bg {
+    background: radial-gradient(circle at 50% -10%, #1f3a31, #11201b 55%, #0c1814 100%);
+  }
+
+  .glass {
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    background-color: #ffffff0d;
+    background-image: linear-gradient(135deg, #ffffff24 0%, #ffffff0a 42%, #ffffff05 100%);
+    border: 1px solid #ffffff24;
+    box-shadow: 0 8px 32px #00000059, inset 0 1px #ffffff40, inset 0 -1px #ffffff0d;
+  }
+
+  .glass-strong {
+    -webkit-backdrop-filter: blur(36px) saturate(200%);
+    backdrop-filter: blur(36px) saturate(200%);
+    background-color: #ffffff14;
+    background-image: linear-gradient(135deg, #ffffff38 0%, #ffffff0f 45%, #ffffff08 100%);
+    border: 1px solid #fff3;
+    box-shadow: 0 16px 48px #0000006b, inset 0 1px #ffffff52, inset 0 -1px #ffffff0f;
+  }
+
+  .glass-dock {
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    backdrop-filter: blur(30px) saturate(180%);
+    background-color: #464b4980;
+    background-image: linear-gradient(135deg, #ffffff2e 0%, #ffffff0d 50%, #ffffff05 100%);
+    border: 1px solid #ffffff29;
+    box-shadow: 0 10px 36px #0000006b, inset 0 1px #ffffff47, inset 0 -1px #ffffff0d;
+  }
+
+  .glass-chip-active {
+    background-color: #6ee7b738;
+    background-image: linear-gradient(135deg, #ffffff42 0%, #6ee7b72e 100%);
+    border: 1px solid #a7f3d066;
+    box-shadow: 0 0 18px #6ee7b740, inset 0 1px #ffffff4d;
+  }
+
+  .glass-orb {
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    backdrop-filter: blur(16px) saturate(160%);
+    background-color: #6ee7b729;
+    background-image: radial-gradient(circle at 35% 28%, #ffffff8c 0%, #ffffff1a 34%, #6ee7b724 100%);
+    border: 1px solid #ffffff4d;
+    box-shadow: 0 8px 24px #00000059, 0 0 30px #6ee7b747, inset 0 1px #ffffff73, inset 0 -2px 8px #ffffff1a;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  button,
+  .glass,
+  nav,
+  [role='tab'] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}

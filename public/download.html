@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0c1814">
+    <title>Fluxo - Download</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#10B981',
+                        background: '#0c1814',
+                        foreground: '#e8f5e9',
+                        card: '#102318',
+                        border: '#1e3a2a',
+                        muted: '#6b8a7a',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', system-ui, sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-foreground min-h-screen flex flex-col">
+    <header class="sticky top-0 z-40 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
+        <div class="flex h-16 items-center justify-between px-4">
+            <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-primary">
+                    <svg class="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+                <span class="text-xl font-bold tracking-tight text-foreground">Fluxo</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-2xl">
+            <!-- App Preview Card -->
+            <div class="glass-strong rounded-3xl p-8 mb-8 text-center">
+                <div class="flex items-center justify-center w-20 h-20 rounded-2xl bg-primary mx-auto mb-6">
+                    <svg class="w-10 h-10 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold tracking-tight mb-2">Fluxo</h1>
+                <p class="text-muted-foreground text-lg mb-6">Ambiente de foco e repouso sensorial para mentes que pensam diferente.</p>
+                
+                <a href="/" class="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-2xl text-lg font-medium hover:bg-primary/90 transition-colors shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                    Abrir no Navegador
+                </a>
+            </div>
+
+            <!-- APK Download Section -->
+            <div class="glass rounded-2xl p-6 mb-6">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-14 h-14 rounded-xl bg-green-500/20 flex items-center justify-center">
+                        <svg class="w-7 h-7 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 18c0 .55.45 1 1 1h1v-3.5c0-.83.67-1.5 1.5-1.5h6c.83 0 1.5.67 1.5 1.5V19h1c.55 0 1-.45 1-1v-3.586l1.707 1.707c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41L12.71 9.59c-.39-.39-1.03-.39-1.41 0L5.71 14.5c-.39.39-.39 1.03 0 1.41.39.39 1.03.39 1.41 0L8 12.414V18z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">APK para Android</h2>
+                        <p class="text-sm text-muted-foreground">Instale no seu dispositivo</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-3 text-sm">
+                    <p class="text-muted-foreground">
+                        O APK será gerado automaticamente via GitHub Actions. 
+                        <strong>Clique no botão abaixo para ver os builds disponíveis:</strong>
+                    </p>
+                    
+                    <a href="https://github.com/seu-usuario/fluxo/actions" target="_blank" rel="noopener noreferrer" 
+                       class="block w-full text-center py-3 px-4 rounded-xl bg-green-500/20 text-green-400 font-medium hover:bg-green-500/30 transition-colors border border-green-500/30">
+                        <svg class="w-5 h-5 inline mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.536-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        Ver Builds no GitHub Actions
+                    </a>
+                    
+                    <p class="text-xs text-muted-foreground text-center">
+                        Ou construa localmente (requer Java 17+):
+                    </p>
+                    <pre class="bg-background p-3 rounded-xl text-xs text-muted-foreground overflow-x-auto">
+<code># Instale Java 21
+winget install EclipseAdoptium.Temurin.21.JDK
+
+# Build
+cd android
+./gradlew assembleDebug
+# APK em: app/build/outputs/apk/debug/app-debug.apk
+</code></pre>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="glass rounded-2xl p-5 text-center">
+                    <div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold mb-1">Seguro</h3>
+                    <p class="text-sm text-muted-foreground">Autenticação completa com email/senha e Google</p>
+                </div>
+                <div class="glass rounded-2xl p-5 text-center">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold mb-1">Offline</h3>
+                    <p class="text-sm text-muted-foreground">Funciona sem internet (PWA + Capacitor)</p>
+                </div>
+                <div class="glass rounded-2xl p-5 text-center">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold mb-1">Leve</h3>
+                    <p class="text-sm text-muted-foreground">~240KB JS, carrega instantaneamente</p>
+                </div>
+            </div>
+
+            <!-- Install as PWA -->
+            <div class="glass rounded-2xl p-6">
+                <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    Instalar como App (PWA)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="space-y-2">
+                        <p class="font-medium">Android (Chrome/Edge):</p>
+                        <ol class="list-decimal list-inside text-muted-foreground space-y-1">
+                            <li>Abra no Chrome</li>
+                            <li>Menu (⋮) → "Instalar app"</li>
+                            <li>Confirme "Instalar"</li>
+                        </ol>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="font-medium">iOS (Safari):</p>
+                        <ol class="list-decimal list-inside text-muted-foreground space-y-1">
+                            <li>Abra no Safari</li>
+                            <li>Compartilhar → "Adicionar à Tela Inicial"</li>
+                            <li>Toque "Adicionar"</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-border/50 py-6 px-4">
+        <p class="text-center text-sm text-muted-foreground">
+            Fluxo — Feito para mentes que pensam diferente
+        </p>
+    </footer>
+
+    <script>
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+    </script>
+</body>
+</html>
