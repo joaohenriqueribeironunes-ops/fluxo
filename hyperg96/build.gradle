@@ -1,0 +1,28 @@
+// Build raiz do HyperG96: AGP 8.13.2 + Kotlin 2.2.0 (mesmas versoes cacheadas
+// pelo projeto android/ existente para manter o build offline-friendly).
+buildscript {
+    ext {
+        minSdkVersion = 24
+        compileSdkVersion = 36
+        targetSdkVersion = 36
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.13.2'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

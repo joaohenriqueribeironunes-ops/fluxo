@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HyperG96</string>
+
+    <!-- Painel principal -->
+    <string name="panel_device">Dispositivo</string>
+    <string name="panel_monitor">Monitor ao vivo</string>
+    <string name="label_cpu">CPU</string>
+    <string name="label_ram">RAM</string>
+    <string name="label_thermal">Térmico</string>
+    <string name="label_battery">Bateria</string>
+    <string name="label_frame">Frame do app</string>
+    <string name="btn_turbo">TURBO AGORA</string>
+    <string name="btn_open_dev">Opções do desenvolvedor</string>
+    <string name="btn_open_compat">Camada de compatibilidade</string>
+    <string name="loading">Lendo hardware…</string>
+    <string name="disclaimer">Sem root e sem ADB. Este app usa só permissões normais e as Opções do Desenvolvedor que você mesmo toca — ele guia, verifica e limpa o que o Android permite limpar.</string>
+
+    <!-- Turbo -->
+    <string name="turbo_title">Turbo executado</string>
+    <string name="turbo_running">Liberando processos em segundo plano…</string>
+    <string name="ok">OK</string>
+
+    <!-- Opções do desenvolvedor -->
+    <string name="dev_options_title">Opções do Desenvolvedor</string>
+    <string name="dev_open">Abrir Opções do Desenvolvedor</string>
+    <string name="dev_note">O Android não permite que apps gravem estes valores sem privilégio de sistema (root/ADB). Por isso o app abre a tela certa, você toca no valor ideal e ele confere se ficou certo.</string>
+    <string name="dev_ideal">Ideal p/ G96:</string>
+    <string name="status_unknown">não exposto neste aparelho</string>
+    <string name="status_ok">%s · ideal aplicado</string>
+    <string name="status_change">%s · ajuste para o ideal</string>
+
+    <string name="dev_item_window_anim">Escala de animação da janela</string>
+    <string name="dev_item_window_anim_ideal">0.5x — aberturas e fechamentos quase instantâneos</string>
+    <string name="dev_item_transition_anim">Escala de animação de transição</string>
+    <string name="dev_item_transition_anim_ideal">0.5x — trocas de tela mais rápidas</string>
+    <string name="dev_item_animator_anim">Escala de duração do animador</string>
+    <string name="dev_item_animator_anim_ideal">0.5x — listas e botões respondem mais rápido</string>
+    <string name="dev_item_gpu_render">Forçar renderização GPU</string>
+    <string name="dev_item_gpu_render_ideal">Ativado — repassa mais desenhos para a Mali-G57 MC2</string>
+    <string name="dev_item_hw_overlay">Desativar sobreposições de hardware</string>
+    <string name="dev_item_hw_overlay_ideal">Ativado — remove uma etapa de composição da tela</string>
+    <string name="dev_item_bg_limit">Limite de processos em segundo plano</string>
+    <string name="dev_item_bg_limit_ideal">Padrão — o sistema decide, até ~4 processos</string>
+
+    <string name="turbo_candidates">Apps em segundo plano processados: %1$d</string>
+    <string name="turbo_ram">RAM disponível: %1$d MB → %2$d MB (%3$s)</string>
+    <string name="turbo_low_memory">O aparelho ainda está em baixa memória — feche também os apps pesados que você não usa.</string>
+
+    <!-- Camada de compatibilidade -->
+    <string name="compat_title">Compatibilidade</string>
+    <string name="compat_profile">Perfil do hardware</string>
+    <string name="compat_adpf">Camada de compatibilidade (ADPF)</string>
+    <string name="compat_adpf_desc">Sessão de hints de desempenho do Android: avisa o scheduler quando o app está desenhando frames, ajudando o sistema a entregar frequência nos núcleos certos. É a parte real (e limitada) da "camada extra" possível sem root.</string>
+    <string name="compat_free_ram">Liberar memória</string>
+    <string name="compat_usage">Uso de apps (opcional)</string>
+    <string name="compat_usage_desc">Abrir a tela de acesso para o app enxergar quais apps estão realmente ativos. Sem ADB: é um toque nas Configurações.</string>
+    <string name="compat_honest">O que este app NÃO faz (por falta de privilégio): mudar governor/affinidade de CPU, undervolt, overclock de GPU Mali, desativar serviços da Xiaomi ou aplicar perfis de kernel. Isso exige root ou ROM custom. Aqui entregamos o máximo legal: monitor, limpeza real de RAM, verificação das Opções do Desenvolvedor e hints de performance.</string>
+    <string name="usage_granted">Concedido</string>
+    <string name="usage_missing">Não concedido</string>
+    <string name="btn_grant_usage">Conceder acesso</string>
+    <string name="btn_free_ram">Liberar agora</string>
+    <string name="adpf_on">Sessão ativa — reportando frames ao scheduler.</string>
+    <string name="adpf_off">Desativada.</string>
+</resources>
