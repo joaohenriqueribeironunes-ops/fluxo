@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <exclude domain="sharedpref" path="secure_gemini_prefs.xml" />
+    <exclude domain="database" path="behavior.db" />
+    <exclude domain="database" path="academic.db" />
+</full-backup-content>

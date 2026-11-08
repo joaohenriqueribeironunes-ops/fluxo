@@ -1,0 +1,1121 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "dc142bfb51aa11081bf66f49a9b7a403",
+    "entities": [
+      {
+        "tableName": "area",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `descricao` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_area_nome",
+            "unique": true,
+            "columnNames": [
+              "nome"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_area_nome` ON `${TABLE_NAME}` (`nome`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "subarea",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `areaId` INTEGER NOT NULL, `nome` TEXT NOT NULL, `descricao` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL, FOREIGN KEY(`areaId`) REFERENCES `area`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "areaId",
+            "columnName": "areaId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_subarea_areaId",
+            "unique": false,
+            "columnNames": [
+              "areaId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_subarea_areaId` ON `${TABLE_NAME}` (`areaId`)"
+          },
+          {
+            "name": "index_subarea_areaId_nome",
+            "unique": true,
+            "columnNames": [
+              "areaId",
+              "nome"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_subarea_areaId_nome` ON `${TABLE_NAME}` (`areaId`, `nome`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "area",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "areaId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "conceito",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `subareaId` INTEGER NOT NULL, `nome` TEXT NOT NULL, `definicaoCurta` TEXT NOT NULL, `tags` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL, FOREIGN KEY(`subareaId`) REFERENCES `subarea`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "subareaId",
+            "columnName": "subareaId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "definicaoCurta",
+            "columnName": "definicaoCurta",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tags",
+            "columnName": "tags",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_conceito_subareaId",
+            "unique": false,
+            "columnNames": [
+              "subareaId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_conceito_subareaId` ON `${TABLE_NAME}` (`subareaId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "subarea",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "subareaId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "explicacao",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `conceitoId` INTEGER NOT NULL, `nivel` TEXT NOT NULL, `texto` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL, FOREIGN KEY(`conceitoId`) REFERENCES `conceito`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "conceitoId",
+            "columnName": "conceitoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivel",
+            "columnName": "nivel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "texto",
+            "columnName": "texto",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_explicacao_conceitoId",
+            "unique": false,
+            "columnNames": [
+              "conceitoId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_explicacao_conceitoId` ON `${TABLE_NAME}` (`conceitoId`)"
+          },
+          {
+            "name": "index_explicacao_nivel",
+            "unique": false,
+            "columnNames": [
+              "nivel"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_explicacao_nivel` ON `${TABLE_NAME}` (`nivel`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "conceito",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "conceitoId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "frase_explicativa",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `conceitoId` INTEGER NOT NULL, `subareaId` INTEGER NOT NULL, `angulo` TEXT NOT NULL, `texto` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL, FOREIGN KEY(`conceitoId`) REFERENCES `conceito`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "conceitoId",
+            "columnName": "conceitoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "subareaId",
+            "columnName": "subareaId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "angulo",
+            "columnName": "angulo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "texto",
+            "columnName": "texto",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_frase_explicativa_conceitoId",
+            "unique": false,
+            "columnNames": [
+              "conceitoId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_frase_explicativa_conceitoId` ON `${TABLE_NAME}` (`conceitoId`)"
+          },
+          {
+            "name": "index_frase_explicativa_subareaId",
+            "unique": false,
+            "columnNames": [
+              "subareaId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_frase_explicativa_subareaId` ON `${TABLE_NAME}` (`subareaId`)"
+          },
+          {
+            "name": "index_frase_explicativa_angulo",
+            "unique": false,
+            "columnNames": [
+              "angulo"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_frase_explicativa_angulo` ON `${TABLE_NAME}` (`angulo`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "conceito",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "conceitoId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "exemplo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `conceitoId` INTEGER NOT NULL, `titulo` TEXT NOT NULL, `texto` TEXT NOT NULL, `contexto` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL, FOREIGN KEY(`conceitoId`) REFERENCES `conceito`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "conceitoId",
+            "columnName": "conceitoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "titulo",
+            "columnName": "titulo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "texto",
+            "columnName": "texto",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contexto",
+            "columnName": "contexto",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_exemplo_conceitoId",
+            "unique": false,
+            "columnNames": [
+              "conceitoId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_exemplo_conceitoId` ON `${TABLE_NAME}` (`conceitoId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "conceito",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "conceitoId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "analogia_visual",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `conceitoId` INTEGER NOT NULL, `descricao` TEXT NOT NULL, `elementos` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL, FOREIGN KEY(`conceitoId`) REFERENCES `conceito`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "conceitoId",
+            "columnName": "conceitoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elementos",
+            "columnName": "elementos",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_analogia_visual_conceitoId",
+            "unique": false,
+            "columnNames": [
+              "conceitoId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_analogia_visual_conceitoId` ON `${TABLE_NAME}` (`conceitoId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "conceito",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "conceitoId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "erro_comum",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `conceitoId` INTEGER NOT NULL, `erro` TEXT NOT NULL, `correcao` TEXT NOT NULL, `porQueAcontece` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL, FOREIGN KEY(`conceitoId`) REFERENCES `conceito`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "conceitoId",
+            "columnName": "conceitoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "erro",
+            "columnName": "erro",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "correcao",
+            "columnName": "correcao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "porQueAcontece",
+            "columnName": "porQueAcontece",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_erro_comum_conceitoId",
+            "unique": false,
+            "columnNames": [
+              "conceitoId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_erro_comum_conceitoId` ON `${TABLE_NAME}` (`conceitoId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "conceito",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "conceitoId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "exercicio",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `conceitoId` INTEGER NOT NULL, `enunciado` TEXT NOT NULL, `resposta` TEXT NOT NULL, `dica` TEXT NOT NULL, `nivel` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL, FOREIGN KEY(`conceitoId`) REFERENCES `conceito`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "conceitoId",
+            "columnName": "conceitoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enunciado",
+            "columnName": "enunciado",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resposta",
+            "columnName": "resposta",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dica",
+            "columnName": "dica",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivel",
+            "columnName": "nivel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_exercicio_conceitoId",
+            "unique": false,
+            "columnNames": [
+              "conceitoId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_exercicio_conceitoId` ON `${TABLE_NAME}` (`conceitoId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "conceito",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "conceitoId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "glossario",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `termo` TEXT NOT NULL, `definicao` TEXT NOT NULL, `areaRelacionada` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "termo",
+            "columnName": "termo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "definicao",
+            "columnName": "definicao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "areaRelacionada",
+            "columnName": "areaRelacionada",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_glossario_termo",
+            "unique": true,
+            "columnNames": [
+              "termo"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_glossario_termo` ON `${TABLE_NAME}` (`termo`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "etimologia",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `termo` TEXT NOT NULL, `raizOriginal` TEXT NOT NULL, `evolucaoFonetica` TEXT NOT NULL, `mudancaSemantica` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "termo",
+            "columnName": "termo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "raizOriginal",
+            "columnName": "raizOriginal",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "evolucaoFonetica",
+            "columnName": "evolucaoFonetica",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mudancaSemantica",
+            "columnName": "mudancaSemantica",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_etimologia_termo",
+            "unique": false,
+            "columnNames": [
+              "termo"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_etimologia_termo` ON `${TABLE_NAME}` (`termo`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "normas_tecnicas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sistema` TEXT NOT NULL, `codigo` TEXT NOT NULL, `titulo` TEXT NOT NULL, `resumo` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sistema",
+            "columnName": "sistema",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "codigo",
+            "columnName": "codigo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "titulo",
+            "columnName": "titulo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resumo",
+            "columnName": "resumo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_normas_tecnicas_codigo",
+            "unique": false,
+            "columnNames": [
+              "codigo"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_normas_tecnicas_codigo` ON `${TABLE_NAME}` (`codigo`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "referencia",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `entidadeTipo` TEXT NOT NULL, `entidadeId` INTEGER NOT NULL, `citacao` TEXT NOT NULL, `urlOuDoi` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "entidadeTipo",
+            "columnName": "entidadeTipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "entidadeId",
+            "columnName": "entidadeId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "citacao",
+            "columnName": "citacao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "urlOuDoi",
+            "columnName": "urlOuDoi",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dc142bfb51aa11081bf66f49a9b7a403')"
+    ]
+  }
+}
