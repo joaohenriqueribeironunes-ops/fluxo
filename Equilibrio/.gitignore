@@ -1,0 +1,29 @@
+# Gradle / Android
+.gradle/
+.kotlin/
+build/
+**/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Assinatura (nunca commitar)
+keystore.properties
+keystore/
+*.jks
+*.keystore
+
+# IDE
+.idea/
+*.iml
+*.hprof
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Artefatos gerados localmente
+dist/
+build_*.log
+test_*.log

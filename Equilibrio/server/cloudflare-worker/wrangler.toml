@@ -1,0 +1,12 @@
+name = "equilibrio-gemini-proxy"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+# Opcional: limite de uso por IP. Crie um namespace KV e cole o id abaixo.
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT"
+# id = "COLE_O_ID_AQUI"
+
+# Variável não secreta. A chave vai em `wrangler secret put GEMINI_API_KEY`.
+[vars]
+GEMINI_MODEL = "gemini-2.5-flash"

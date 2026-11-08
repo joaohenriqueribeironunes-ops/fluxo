@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Equilíbrio</string>
+    <string name="notification_channel_collection">Coleta em segundo plano</string>
+    <string name="notification_channel_alerts">Alertas preventivos</string>
+    <string name="notification_channel_reminders">Lembretes gentis</string>
+    <string name="notification_channel_debrief">Pós-crise</string>
+    <string name="disclaimer">Ferramenta de autoconhecimento. Não substitui avaliação ou acompanhamento profissional. Em risco à segurança: CVV 188 ou SAMU 192.</string>
+</resources>
