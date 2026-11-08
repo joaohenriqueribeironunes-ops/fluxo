@@ -1,0 +1,5 @@
+# Dependências do gerador (Fase 2). Instale em um venv:
+#   python -m venv .venv && .venv\Scripts\activate && pip install -r requirements.txt
+google-generativeai>=0.8.0
+jsonschema>=4.20.0
+# sqlite3 é stdlib
