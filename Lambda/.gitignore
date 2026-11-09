@@ -17,6 +17,8 @@ local.properties
 keystore.properties
 kspCaches/
 **/kspCaches/
+.kotlin/
+**/.kotlin/
 **/schemas/*.json.tmp
 /docs/PENDENCIAS.md.tmp
 tools/gerador/.checkpoints/

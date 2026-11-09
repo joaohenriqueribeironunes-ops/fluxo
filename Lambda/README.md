@@ -27,9 +27,10 @@ Metas: `behavior.db` ≥ 3000 `resposta_relacionamento` distintas (ND/NT e 8 rel
 ```powershell
 cd Lambda
 .\gradlew.bat :app:assembleDebug
+.\gradlew.bat :app:assembleRelease   # APK assinado (keystore local, ver docs/ASSINATURA.md)
 .\gradlew.bat :app:compileDebugKotlin
 ```
-APK debug: `app/build/outputs/apk/debug/`.
+APK debug: `app/build/outputs/apk/debug/` · APK release assinado: `app/build/outputs/apk/release/`.
 
 ## Gemini (opcional, desativado)
 O app **não precisa** do Gemini. A tela “Conectar Gemini” existe apenas como opção (chave criptografada, teste 401/403/429, revogar). O pipeline `tools/gerador/gerar.py` (com API) está presente mas **não é o caminho recomendado**; use `seed_local.py`.
@@ -39,6 +40,7 @@ O app **não precisa** do Gemini. A tela “Conectar Gemini” existe apenas com
 
 ## Documentação
 - `docs/PENDENCIAS.md` — itens em evolução
+- `docs/ASSINATURA.md` — keystore e build de release assinada
 - `docs/COBERTURA.md` — áreas (gerado após seed completo)
 - `docs/IA_LOCAL.md` — benchmark/decisão LLM local
 - `docs/MIUI_BATERIA.md` — permissões/bateria no MIUI
