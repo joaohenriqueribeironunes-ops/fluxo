@@ -1,1 +1,0 @@
-# Arborecence gerador (Fase 2)
