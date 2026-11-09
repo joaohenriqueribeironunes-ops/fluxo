@@ -50,7 +50,8 @@ fun StudyScreen(vm: StudyViewModel, modifier: Modifier = Modifier) {
                 } }
             }
         }
-        Text("Em evolução: marca-texto 4 cores (lavanda/menta/âmbar/água), revisão espaçada, mapa de conexões, linhas do tempo, hiperfoco, foco curto (pomodoro adaptável), checklists de início de tarefa.", style = MaterialTheme.typography.bodySmall)
+        CognitiveOffloadSection()
+        Text("Em evolução: marca-texto 4 cores (lavanda/menta/âmbar/água), revisão espaçada, mapa de conexões, linhas do tempo, hiperfoco, foco curto (pomodoro adaptável), checklists de início de tarefa. Entrada por voz (STT offline) integrada ao descarregamento: em evolução.", style = MaterialTheme.typography.bodySmall)
         Spacer(Modifier.height(24.dp))
     }
 }

@@ -34,7 +34,7 @@ import com.arborecence.aiengine.AiResult
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun BehaviorScreen(vm: BehaviorViewModel, modifier: Modifier = Modifier) {
+fun BehaviorScreen(vm: BehaviorViewModel, modifier: Modifier = Modifier, onSpeak: ((String) -> Unit)? = null) {
     val s by vm.state.collectAsState()
     Column(
         modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
@@ -79,14 +79,14 @@ fun BehaviorScreen(vm: BehaviorViewModel, modifier: Modifier = Modifier) {
             else Text("Ver leitura ND e NT")
         }
         s.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        s.resultNd?.let { ResultCard("Leitura ND (como pode ser percebido/sentido)", it) }
-        s.resultNt?.let { ResultCard("Leitura NT (como pode ser interpretado)", it) }
+        s.resultNd?.let { ResultCard("Leitura ND (como pode ser percebido/sentido)", it, onSpeak) }
+        s.resultNt?.let { ResultCard("Leitura NT (como pode ser interpretado)", it, onSpeak) }
         Spacer(Modifier.height(24.dp))
     }
 }
 
 @Composable
-private fun ResultCard(title: String, r: AiResult) {
+private fun ResultCard(title: String, r: AiResult, onSpeak: ((String) -> Unit)? = null) {
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(title, style = MaterialTheme.typography.titleSmall)
@@ -96,6 +96,9 @@ private fun ResultCard(title: String, r: AiResult) {
                     "Fonte: ${r.fonte} · Confiança: ${"%.2f".format(r.nivelConfianca)} · ${r.meta}",
                     style = MaterialTheme.typography.labelSmall,
                 )
+            }
+            if (onSpeak != null) {
+                androidx.compose.material3.TextButton(onClick = { onSpeak(r.texto) }) { Text("Ouvir (TTS offline)") }
             }
         }
     }

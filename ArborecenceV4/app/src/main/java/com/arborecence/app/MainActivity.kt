@@ -32,6 +32,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,6 +44,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -51,6 +53,7 @@ import com.arborecence.app.ui.AccessibilitySettings
 import com.arborecence.app.ui.AppPreferences
 import com.arborecence.app.ui.BehaviorScreen
 import com.arborecence.app.ui.BehaviorViewModel
+import com.arborecence.app.util.TtsHelper
 import com.arborecence.coreui.theme.ArborecenceTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -96,6 +99,10 @@ class MainActivity : ComponentActivity() {
 private fun AppShell(onOpenGemini: () -> Unit, prefs: AppPreferences, a11y: AccessibilitySettings) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     val tabs = listOf("Tradutor", "Estudos", "Ajustes")
+    val ctx = LocalContext.current
+    val tts = remember { TtsHelper(ctx) }
+    DisposableEffect(Unit) { onDispose { tts.shutdown() } }
+    val speak: (String) -> Unit = { text -> tts.speak(text, enabled = !a11y.noUnexpectedSounds) }
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -111,7 +118,7 @@ private fun AppShell(onOpenGemini: () -> Unit, prefs: AppPreferences, a11y: Acce
         }
     ) { pad ->
         when (tab) {
-            0 -> { val vm: BehaviorViewModel = hiltViewModel(); BehaviorScreen(vm, Modifier.padding(pad)) }
+            0 -> { val vm: BehaviorViewModel = hiltViewModel(); BehaviorScreen(vm, Modifier.padding(pad), onSpeak = speak) }
             1 -> { val vm: com.arborecence.app.ui.StudyViewModel = hiltViewModel(); com.arborecence.app.ui.StudyScreen(vm, Modifier.padding(pad)) }
             else -> SettingsScreen(Modifier.padding(pad), onOpenGemini = onOpenGemini, prefs = prefs, a11y = a11y)
         }
@@ -159,6 +166,8 @@ private fun SettingsScreen(modifier: Modifier = Modifier, onOpenGemini: () -> Un
             }
         }
 
+        Text("O que o app aprendeu (local)", style = MaterialTheme.typography.titleSmall)
+        Text("Aprendizado local, sem API: preferências de acessibilidade e modo ficam salvas neste aparelho. A evolução de lacunas/perfil por uso (painel detalhado) segue em implementação — ver docs/PENDENCIAS.", style = MaterialTheme.typography.bodySmall)
         Text("Privacidade e dados", style = MaterialTheme.typography.titleSmall)
         Text("Local por padrão, sem telemetria. A chave Gemini (se usada) fica criptografada no aparelho. Exportação/importação JSON e criptografia reforçada do banco: em evolução (ver docs/PENDENCIAS).", style = MaterialTheme.typography.bodySmall)
         Text("Sobre o conteúdo", style = MaterialTheme.typography.titleSmall)

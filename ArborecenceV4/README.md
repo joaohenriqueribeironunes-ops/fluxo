@@ -1,38 +1,47 @@
-# Arborecence (FASE 1)
+# Arborecence
 
-Assistente pessoal neurodivergente (Android, Kotlin + Jetpack Compose, Material3). PT-BR.
+Assistente pessoal neurodivergente (Android, Kotlin + Jetpack Compose, Material3). PT-BR.  
+Funciona **100% offline** por padrão — **sem depender da API do Gemini**.
 
-## Estado atual (FASE 1)
-- Estrutura multi-módulo: `app`, `core-ui`, `data-behavior`, `data-academic`, `ai-engine`, `voice`, `study`.
-- Room com dois bancos separados e schemas exportáveis:
-  - `behavior.db`: situações, leituras ND/NT, ponte, tipos de relação, `resposta_relacionamento`, emoção, alexitimia, sensorial, função executiva, perfil do usuário. Índice FTS5 em `resposta_relacionamento`.
-  - `academic.db`: áreas/subáreas/conceitos, explicações por nível, `frase_explicativa` (com `angulo`), exemplos, analogias, erros comuns, exercícios, glossário, etimologia, normas técnicas, referências. Índice FTS5 em `frase_explicativa`.
-  - Metadados: `fonte`, `nivel_confianca`, `data_geracao`, `revisado`. Migrações estruturadas.
-- Tela de primeira execução **Conectar ao Gemini**: chave em `EncryptedSharedPreferences` (Keystore), testar conexão (erros 401/403/429 tratados com mensagem clara), revogar/apagar, usar offline. Sem chave no código/logs/assets.
-- Script `tools/verificar_volume.py` (`.bat`/`.ps1`): conta, deduplica (cosseno < 0,85) e **falha** se metas não forem atingidas.
+## O que faz
+- **Tradutor social (ND ↔ NT)**: para cada situação, mostra duas leituras — como uma pessoa **ND** tende a perceber/sentir e como uma pessoa **NT** tende a interpretar. Nenhuma é “certa”: são traduções. Linguagem literal, “o que dizer/fazer”, sem infantilizar/julgar. Mostra **fonte** e **nível de confiança**.
+- **Modos**: Curto, Padrão, Detalhado. Relações: amizade, amor, família, trabalho, colegas, vizinhos, desconhecidos, atendimento.
+- **Central de estudos**: busca offline (FTS5) em frases explicativas e etimologia; descarregamento cognitivo (separa tarefas/ideias/emoções/dúvidas).
+- **Acessibilidade neurodivergente**: baixo estímulo, alto contraste, movimento reduzido, sem sons inesperados (padrões seguros), fonte ajustável, navegação previsível.
+- **Voz/TTS**: leitura em voz alta (TTS offline pt-BR) quando sons não estiverem bloqueados; Quick Settings Tile; guia MIUI.
+- **Privacidade**: local por padrão, sem telemetria. Chave Gemini (opcional) em armazenamento criptografado no aparelho. Apoio, não substitui profissional. Risco imediato: **CVV 188** / **SAMU 192**.
 
 ## Requisitos
-- JDK 17, Android SDK (API 35/34), minSdk 26, targetSdk 34.
-- Dispositivo alvo: Redmi Note 11S (Android 13/MIUI).
+- JDK 17, Android SDK (API 35/34). minSdk 26, targetSdk 34. Alvo: Redmi Note 11S.
 
-## Configuração da chave do Gemini (seguro)
-- **App**: colar/trocar na tela "Conectar ao Gemini" (armazenamento criptografado). Nunca versionar.
-- **Pipeline de geração (`tools/gerador/`, fases seguintes)**: criar `local.properties` na raiz do projeto com `GEMINI_API_KEY=...`. O arquivo é ignorado pelo git. **Nunca** commitar.
+## Popular os bancos (obrigatório, **sem API**)
+Os schemas Room existem, mas o conteúdo precisa ser gerado localmente e verificado:
+```powershell
+cd ArborecenceV4
+python tools/gerador/seed_local.py
+python tools/verificar_volume.py
+```
+Metas: `behavior.db` ≥ 3000 `resposta_relacionamento` distintas (ND/NT e 8 relações equilibrados, cosseno < 0,85); `academic.db` ≥ 2500 `frase_explicativa` (≥ 50/subárea) + ≥ 300 `etimologia`. Os `.db` são copiados para `app/src/main/assets/`.
 
-## Build
+## Build e testes
 ```powershell
 cd ArborecenceV4
 .\gradlew.bat :app:assembleDebug
-.\gradlew.bat test
+.\gradlew.bat :app:compileDebugKotlin
 ```
+APK debug: `app/build/outputs/apk/debug/`.
 
-## Verificação de volume (obrigatória quando os bancos forem gerados)
-```powershell
-python tools/verificar_volume.py
-# ou
-.\gradlew.bat verifyVolume
-```
-Metas: `behavior.db` ≥ 3000 `resposta_relacionamento` distintas (ND/NT e relações equilibrados); `academic.db` ≥ 2500 `frase_explicativa` distintas (≥ 50 por subárea). Sai com erro se falhar.
+## Gemini (opcional, desativado)
+O app **não precisa** do Gemini. A tela “Conectar Gemini” existe apenas como opção (chave criptografada, teste 401/403/429, revogar). O pipeline `tools/gerador/gerar.py` (com API) está presente mas **não é o caminho recomendado**; use `seed_local.py`.
 
-## Pendências
-Ver `docs/PENDENCIAS.md`.
+## Estrutura
+`app`, `core-ui`, `data-behavior` (`behavior.db` + FTS5), `data-academic` (`academic.db` + FTS5), `ai-engine` (recuperação/composição offline), `voice`, `study`, `tools/` (seed local, verificação de volume).
+
+## Documentação
+- `docs/PENDENCIAS.md` — itens em evolução
+- `docs/COBERTURA.md` — áreas (gerado após seed completo)
+- `docs/IA_LOCAL.md` — benchmark/decisão LLM local
+- `docs/MIUI_BATERIA.md` — permissões/bateria no MIUI
+
+## Ética
+Sem diagnóstico, sem dose, sem plano prescritivo. Conteúdo sensível é informativo. ND/NT sem certo/errado.
