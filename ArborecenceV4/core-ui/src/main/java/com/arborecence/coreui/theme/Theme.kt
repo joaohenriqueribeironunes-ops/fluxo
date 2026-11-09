@@ -27,20 +27,52 @@ private val DarkColors = darkColorScheme(
     surface = Color(0xFF1C231E),
 )
 
+private val HighContrastLight = lightColorScheme(
+    primary = Color(0xFF00391F), onPrimary = Color.White,
+    background = Color(0xFFFFFFFF), onBackground = Color(0xFF000000),
+    surface = Color(0xFFFFFFFF), onSurface = Color(0xFF000000),
+    surfaceVariant = Color(0xFFE6E6E6), onSurfaceVariant = Color(0xFF000000),
+)
+
+private val HighContrastDark = darkColorScheme(
+    primary = Color(0xFFBFF0C8), onPrimary = Color(0xFF000000),
+    background = Color(0xFF000000), onBackground = Color(0xFFFFFFFF),
+    surface = Color(0xFF000000), onSurface = Color(0xFFFFFFFF),
+    surfaceVariant = Color(0xFF222222), onSurfaceVariant = Color(0xFFFFFFFF),
+)
+
 @Composable
 fun ArborecenceTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
-    lowStimulus: Boolean = false,
+    lowStimulus: Boolean = true,
+    highContrast: Boolean = false,
+    reducedMotion: Boolean = true,
+    fontScale: Float = 1.0f,
     content: @Composable () -> Unit,
 ) {
     val scheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        highContrast && darkTheme -> HighContrastDark
+        highContrast -> HighContrastLight
+        !lowStimulus && dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val ctx = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(ctx) else dynamicLightColorScheme(ctx)
         }
         darkTheme -> DarkColors
         else -> LightColors
     }
-    MaterialTheme(colorScheme = scheme, typography = MaterialTheme.typography, content = content)
+    val base = MaterialTheme.typography
+    val typography = if (fontScale == 1.0f) base else androidx.compose.material3.Typography(
+        headlineSmall = base.headlineSmall.copy(fontSize = base.headlineSmall.fontSize * fontScale),
+        titleLarge = base.titleLarge.copy(fontSize = base.titleLarge.fontSize * fontScale),
+        titleMedium = base.titleMedium.copy(fontSize = base.titleMedium.fontSize * fontScale),
+        titleSmall = base.titleSmall.copy(fontSize = base.titleSmall.fontSize * fontScale),
+        bodyLarge = base.bodyLarge.copy(fontSize = base.bodyLarge.fontSize * fontScale),
+        bodyMedium = base.bodyMedium.copy(fontSize = base.bodyMedium.fontSize * fontScale),
+        bodySmall = base.bodySmall.copy(fontSize = base.bodySmall.fontSize * fontScale),
+        labelLarge = base.labelLarge.copy(fontSize = base.labelLarge.fontSize * fontScale),
+        labelMedium = base.labelMedium.copy(fontSize = base.labelMedium.fontSize * fontScale),
+        labelSmall = base.labelSmall.copy(fontSize = base.labelSmall.fontSize * fontScale),
+    )
+    MaterialTheme(colorScheme = scheme, typography = typography, content = content)
 }

@@ -4,7 +4,10 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Transaction
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.arborecence.databehavior.entity.AlexitimiaPista
 import com.arborecence.databehavior.entity.Emocao
 import com.arborecence.databehavior.entity.FuncaoExecutivaEstrategia
@@ -36,5 +39,27 @@ interface BehaviorDao {
     @Query("SELECT COUNT(*) FROM resposta_relacionamento WHERE perfilNdOuNt = :perfil") suspend fun countRespostasPorPerfil(perfil: String): Int
     @Query("SELECT * FROM resposta_relacionamento WHERE relacaoTipo = :relacao AND perfilNdOuNt = :perfil ORDER BY RANDOM() LIMIT :limit")
     suspend fun respostasPorRelacaoPerfil(relacao: String, perfil: String, limit: Int): List<RespostaRelacionamento>
+
+    @RawQuery(observedEntities = [RespostaRelacionamento::class])
+    suspend fun searchFtsRaw(query: SupportSQLiteQuery): List<RespostaRelacionamento>
+
+    suspend fun searchFts(query: String, limit: Int = 20): List<RespostaRelacionamento> =
+        searchFtsRaw(SimpleSQLiteQuery(
+            "SELECT r.* FROM resposta_relacionamento r JOIN resposta_relacionamento_fts f ON r.id = f.rowid WHERE resposta_relacionamento_fts MATCH ? ORDER BY rank LIMIT ?",
+            arrayOf(query, limit),
+        ))
+
+    suspend fun searchFtsPerfil(query: String, perfil: String, limit: Int = 20): List<RespostaRelacionamento> =
+        searchFtsRaw(SimpleSQLiteQuery(
+            "SELECT r.* FROM resposta_relacionamento r JOIN resposta_relacionamento_fts f ON r.id = f.rowid WHERE resposta_relacionamento_fts MATCH ? AND r.perfilNdOuNt = ? ORDER BY rank LIMIT ?",
+            arrayOf(query, perfil, limit),
+        ))
+
+    @Query("SELECT DISTINCT relacaoTipo FROM resposta_relacionamento ORDER BY relacaoTipo")
+    suspend fun listRelacoes(): List<String>
+
+    @Query("SELECT DISTINCT subtema FROM resposta_relacionamento WHERE relacaoTipo = :relacao ORDER BY subtema")
+    suspend fun listSubtemas(relacao: String): List<String>
+
     @Query("SELECT * FROM perfil_usuario WHERE id = 1") suspend fun getPerfil(): PerfilUsuario?
 }
