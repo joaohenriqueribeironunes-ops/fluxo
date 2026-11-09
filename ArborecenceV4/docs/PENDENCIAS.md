@@ -5,9 +5,11 @@ Itens fora do escopo da fase atual, sem placeholders no código entregue.
 ## Fase 1 (entregue)
 - Estrutura multi-módulo, `behavior.db`/`academic.db` (Room + FTS5 + schemas/migrações), tela "Conectar ao Gemini" (chave criptografada, teste 401/403/429, revogar), script `tools/verificar_volume`.
 
-## Fase 2 (implementada — execução pendente de confirmação/cota)
-- `tools/gerador/` implementado: lê chave só de `local.properties`; lotes por subtema/subárea; prompts estruturados com saída JSON; retentativas com backoff exponencial + limite de RPM; **checkpoint** retomável (`.checkpoints/`); **estimativa de chamadas/custo** com **confirmação obrigatória** (`SIM`/`--yes` após revisar) antes de consumir API; deduplicação (cosseno < 0,85), tamanho mínimo, `revisado=false`, relatório de cobertura (`reports/`); prompt de segurança para conteúdo sensível (informativo, sem diagnóstico, sem dose, sem plano prescritivo; farmacocinética só ADME geral); empacota `.db` em `app/src/main/assets/`.
-- **Pendente (requer ação sua)**: instalar deps (`pip install -r tools/gerador/requirements.txt`), rodar `python tools/gerador/gerar.py --estimate-only`, revisar estimativa/cota e confirmar a execução para gerar/popular os bancos. (Neste ambiente não há runtime Python funcional; rode no seu computador.)
+## Fase 2 — API ignorada por decisão do usuário (app offline-first)
+- `tools/gerador/` (Gemini) permanece no repositório, mas **não deve ser usado** enquanto a diretriz for "sem API".
+- **Novo**: `tools/gerador/seed_local.py` gera `behavior.db` e `academic.db` **sem API** (templates/variações, dedup cosseno < 0,85, `revisado=false`, metadados), cobrindo 8 relações × subtemas × ND/NT (alvo ≥ 3000), todas as áreas obrigatórias (58 subáreas × 50 frases = alvo ≥ 2900) e ≥ 300 etimologias (raiz, evolução fonética, mudança semântica). Copia para `app/src/main/assets/`.
+  - **Ação sua (no PC, com Python stdlib, sem instalar deps de API):** `cd ArborecenceV4 && python tools/gerador/seed_local.py && python tools/verificar_volume.py` (ajustar se `verificar_volume` precisar de ambiente; o seed usa só stdlib).
+- App alterado para **funcionar sem precisar da API**: Gemini opcional, não bloqueante (tela inicial offline).
 - Corrigir execução de testes unitários Android (Hilt ASM × classpath de teste no Windows) e ampliar testes de DAOs/recuperação.
 
 ## Próximas fases

@@ -49,10 +49,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         setContent {
             ArborecenceTheme {
-                var onboarded by remember { mutableStateOf(keyStore.hasKey() || false) }
-                var showConnect by remember { mutableStateOf(!keyStore.hasKey()) }
+                var showConnect by remember {
+                    mutableStateOf(prefs.getBoolean("show_gemini_onboarding", false) && !keyStore.hasKey())
+                }
                 Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     if (showConnect) {
                         ConnectGeminiScreen(
@@ -63,7 +65,10 @@ class MainActivity : ComponentActivity() {
                                 keyStore.revokeKey()
                                 showConnect = true
                             },
-                            onContinue = { showConnect = false; onboarded = true },
+                            onContinue = {
+                                prefs.edit().putBoolean("show_gemini_onboarding", false).apply()
+                                showConnect = false
+                            },
                         )
                     } else {
                         HomePlaceholder(onOpenGemini = { showConnect = true })
@@ -156,11 +161,19 @@ private fun HomePlaceholder(onOpenGemini: () -> Unit) {
             modifier = Modifier.fillMaxSize().padding(pad).padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("Arborecence — FASE 1", style = MaterialTheme.typography.headlineSmall)
-            Text("Estrutura, módulos e bancos de dados prontos. Conteúdo e recursos completos chegam nas próximas fases.", style = MaterialTheme.typography.bodyMedium)
-            Text("• behavior.db e academic.db (schemas Room)\n• Tela de conexão Gemini (chave criptografada)\n• Script de verificação de volume", style = MaterialTheme.typography.bodySmall)
+            Text("Arborecence", style = MaterialTheme.typography.headlineSmall)
+            Text(
+                "Modo offline: o app funciona sem API. Os bancos locais (behavior.db e academic.db) alimentam as respostas e os estudos quando estiverem disponíveis.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                "• Duas leituras: como uma pessoa ND tende a perceber/sentir e como uma pessoa NT tende a interpretar (tradução, sem certo/errado)\n" +
+                    "• Frases curtas e literais, com “o que dizer/fazer”\n" +
+                    "• Gemini é opcional (desativado por padrão)",
+                style = MaterialTheme.typography.bodySmall,
+            )
             Spacer(Modifier.height(8.dp))
-            OutlinedButton(onClick = onOpenGemini) { Text("Conectar / trocar Gemini") }
+            OutlinedButton(onClick = onOpenGemini) { Text("Conectar Gemini (opcional)") }
         }
     }
 }
