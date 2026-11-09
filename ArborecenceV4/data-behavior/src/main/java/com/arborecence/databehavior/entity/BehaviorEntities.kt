@@ -166,3 +166,34 @@ data class PerfilUsuario(
     val modoRespostaPadrao: String = "padrao", // curto|padrao|detalhado
     val dataAtualizacao: Long = 0L,
 )
+
+@Entity(tableName = "compromisso")
+data class Compromisso(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val titulo: String,
+    val descricao: String = "",
+    val dataHoraMillis: Long? = null,
+    val local: String = "",
+    val tipo: String = "geral", // geral, estudo, saude-info, social, trabalho
+    val concluido: Boolean = false,
+    val lembrete: Boolean = false,
+    val fonte: String = "usuario",
+    val nivelConfianca: Double = 1.0,
+    val dataGeracao: Long = 0L,
+    val revisado: Boolean = true,
+)
+
+@Entity(tableName = "destaque_cognitivo")
+data class DestaqueCognitivo(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val texto: String,
+    val cor: String, // lavanda, menta, ambar, agua
+    val categoria: String, // conceito, exemplo, atencao, duvida
+    val origem: String = "descarregamento", // descarregamento, estudo, tradutor
+    val nota: String = "",
+    val concluido: Boolean = false,
+    val fonte: String = "usuario",
+    val nivelConfianca: Double = 1.0,
+    val dataGeracao: Long = 0L,
+    val revisado: Boolean = true,
+)

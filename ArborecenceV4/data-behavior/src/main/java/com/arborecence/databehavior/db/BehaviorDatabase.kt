@@ -8,6 +8,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.arborecence.databehavior.dao.BehaviorDao
 import com.arborecence.databehavior.entity.AlexitimiaPista
+import com.arborecence.databehavior.entity.Compromisso
+import com.arborecence.databehavior.entity.DestaqueCognitivo
 import com.arborecence.databehavior.entity.Emocao
 import com.arborecence.databehavior.entity.FuncaoExecutivaEstrategia
 import com.arborecence.databehavior.entity.LeituraNd
@@ -24,9 +26,9 @@ import com.arborecence.databehavior.entity.Situacao
         Situacao::class, LeituraNd::class, LeituraNt::class, Ponte::class,
         RelacaoTipo::class, RespostaRelacionamento::class, Emocao::class,
         AlexitimiaPista::class, SensorialPerfil::class, FuncaoExecutivaEstrategia::class,
-        PerfilUsuario::class,
+        PerfilUsuario::class, Compromisso::class, DestaqueCognitivo::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class BehaviorDatabase : RoomDatabase() {
@@ -80,7 +82,13 @@ abstract class BehaviorDatabase : RoomDatabase() {
             )
         }
 
-        // FASE 1: v1 baseline. Adicione migrações aqui nas próximas fases.
-        val ALL_MIGRATIONS: Array<Migration> = emptyArray()
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `compromisso` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `titulo` TEXT NOT NULL, `descricao` TEXT NOT NULL, `dataHoraMillis` INTEGER, `local` TEXT NOT NULL, `tipo` TEXT NOT NULL, `concluido` INTEGER NOT NULL, `lembrete` INTEGER NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `destaque_cognitivo` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `texto` TEXT NOT NULL, `cor` TEXT NOT NULL, `categoria` TEXT NOT NULL, `origem` TEXT NOT NULL, `nota` TEXT NOT NULL, `concluido` INTEGER NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)")
+            }
+        }
+
+        val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2)
     }
 }

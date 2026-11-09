@@ -8,7 +8,7 @@ LOCAL_PROPS = ROOT / "local.properties"
 ASSETS_DIR = ROOT / "app" / "src" / "main" / "assets"
 CHECKPOINT_DIR = ROOT / "tools" / "gerador" / ".checkpoints"
 REPORT_DIR = ROOT / "tools" / "gerador" / "reports"
-BEHAVIOR_SCHEMA = ROOT / "data-behavior" / "schemas" / "com.arborecence.databehavior.db.BehaviorDatabase" / "1.json"
+BEHAVIOR_SCHEMA = ROOT / "data-behavior" / "schemas" / "com.arborecence.databehavior.db.BehaviorDatabase" / "2.json"
 ACADEMIC_SCHEMA = ROOT / "data-academic" / "schemas" / "com.arborecence.dataacademic.db.AcademicDatabase" / "1.json"
 
 @dataclass

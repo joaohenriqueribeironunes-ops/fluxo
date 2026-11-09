@@ -19,3 +19,8 @@ kspCaches/
 **/kspCaches/
 **/schemas/*.json.tmp
 /docs/PENDENCIAS.md.tmp
+tools/gerador/.checkpoints/
+tools/gerador/out/
+tools/gerador/reports/
+tools/gerador/.venv/
+**/__pycache__/

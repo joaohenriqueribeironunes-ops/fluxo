@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -98,7 +99,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun AppShell(onOpenGemini: () -> Unit, prefs: AppPreferences, a11y: AccessibilitySettings) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
-    val tabs = listOf("Tradutor", "Estudos", "Ajustes")
+    val tabs = listOf("Tradutor", "Estudos", "Compromissos", "Ajustes")
     val ctx = LocalContext.current
     val tts = remember { TtsHelper(ctx) }
     DisposableEffect(Unit) { onDispose { tts.shutdown() } }
@@ -110,7 +111,7 @@ private fun AppShell(onOpenGemini: () -> Unit, prefs: AppPreferences, a11y: Acce
                     NavigationBarItem(
                         selected = tab == i,
                         onClick = { tab = i },
-                        icon = { Icon(when (i) { 0 -> Icons.Filled.Favorite; 1 -> Icons.Filled.Book; else -> Icons.Filled.Settings }, null) },
+                        icon = { Icon(when (i) { 0 -> Icons.Filled.Favorite; 1 -> Icons.Filled.Book; 2 -> Icons.Filled.Event; else -> Icons.Filled.Settings }, null) },
                         label = { Text(label) },
                     )
                 }
@@ -120,6 +121,7 @@ private fun AppShell(onOpenGemini: () -> Unit, prefs: AppPreferences, a11y: Acce
         when (tab) {
             0 -> { val vm: BehaviorViewModel = hiltViewModel(); BehaviorScreen(vm, Modifier.padding(pad), onSpeak = speak) }
             1 -> { val vm: com.arborecence.app.ui.StudyViewModel = hiltViewModel(); com.arborecence.app.ui.StudyScreen(vm, Modifier.padding(pad)) }
+            2 -> { val vm: com.arborecence.app.ui.CommitmentsViewModel = hiltViewModel(); com.arborecence.app.ui.CommitmentsScreen(vm, Modifier.padding(pad)) }
             else -> SettingsScreen(Modifier.padding(pad), onOpenGemini = onOpenGemini, prefs = prefs, a11y = a11y)
         }
     }
@@ -166,10 +168,10 @@ private fun SettingsScreen(modifier: Modifier = Modifier, onOpenGemini: () -> Un
             }
         }
 
-        Text("O que o app aprendeu (local)", style = MaterialTheme.typography.titleSmall)
-        Text("Aprendizado local, sem API: preferências de acessibilidade e modo ficam salvas neste aparelho. A evolução de lacunas/perfil por uso (painel detalhado) segue em implementação — ver docs/PENDENCIAS.", style = MaterialTheme.typography.bodySmall)
+        com.arborecence.app.ui.LearnedSection()
         Text("Privacidade e dados", style = MaterialTheme.typography.titleSmall)
-        Text("Local por padrão, sem telemetria. A chave Gemini (se usada) fica criptografada no aparelho. Exportação/importação JSON e criptografia reforçada do banco: em evolução (ver docs/PENDENCIAS).", style = MaterialTheme.typography.bodySmall)
+        Text("Local por padrão, sem telemetria. A chave Gemini (se usada) fica criptografada no aparelho.", style = MaterialTheme.typography.bodySmall)
+        com.arborecence.app.ui.BackupSection()
         Text("Sobre o conteúdo", style = MaterialTheme.typography.titleSmall)
         Text("Respostas mostram fonte e nível de confiança. ND e NT são leituras diferentes (tradução), sem certo/errado.", style = MaterialTheme.typography.bodySmall)
     }

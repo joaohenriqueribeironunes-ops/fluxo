@@ -1,0 +1,1050 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "553a5142564d22c00cd5997bc3cd4c51",
+    "entities": [
+      {
+        "tableName": "situacao",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `categoria` TEXT NOT NULL, `titulo` TEXT NOT NULL, `descricao` TEXT NOT NULL, `contextoAmbiente` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoria",
+            "columnName": "categoria",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "titulo",
+            "columnName": "titulo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contextoAmbiente",
+            "columnName": "contextoAmbiente",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "leitura_nd",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`situacaoId` INTEGER NOT NULL, `percepcaoSensorial` TEXT NOT NULL, `interpretacaoLiteral` TEXT NOT NULL, `emocaoProvavel` TEXT NOT NULL, `cargaCognitiva` TEXT NOT NULL, `sinalDeSobrecarga` TEXT NOT NULL, `estrategiaDeRegulacao` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL, PRIMARY KEY(`situacaoId`), FOREIGN KEY(`situacaoId`) REFERENCES `situacao`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "situacaoId",
+            "columnName": "situacaoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "percepcaoSensorial",
+            "columnName": "percepcaoSensorial",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "interpretacaoLiteral",
+            "columnName": "interpretacaoLiteral",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "emocaoProvavel",
+            "columnName": "emocaoProvavel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cargaCognitiva",
+            "columnName": "cargaCognitiva",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sinalDeSobrecarga",
+            "columnName": "sinalDeSobrecarga",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estrategiaDeRegulacao",
+            "columnName": "estrategiaDeRegulacao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "situacaoId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_leitura_nd_situacaoId",
+            "unique": false,
+            "columnNames": [
+              "situacaoId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_leitura_nd_situacaoId` ON `${TABLE_NAME}` (`situacaoId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "situacao",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "situacaoId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "leitura_nt",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`situacaoId` INTEGER NOT NULL, `intencaoProvavel` TEXT NOT NULL, `expectativaSocialImplicita` TEXT NOT NULL, `comoInterpretaOComportamentoNd` TEXT NOT NULL, `malEntendidoComum` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL, PRIMARY KEY(`situacaoId`), FOREIGN KEY(`situacaoId`) REFERENCES `situacao`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "situacaoId",
+            "columnName": "situacaoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "intencaoProvavel",
+            "columnName": "intencaoProvavel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "expectativaSocialImplicita",
+            "columnName": "expectativaSocialImplicita",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "comoInterpretaOComportamentoNd",
+            "columnName": "comoInterpretaOComportamentoNd",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "malEntendidoComum",
+            "columnName": "malEntendidoComum",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "situacaoId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_leitura_nt_situacaoId",
+            "unique": false,
+            "columnNames": [
+              "situacaoId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_leitura_nt_situacaoId` ON `${TABLE_NAME}` (`situacaoId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "situacao",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "situacaoId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "ponte",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`situacaoId` INTEGER NOT NULL, `oQueDizerScripts` TEXT NOT NULL, `oQueFazer` TEXT NOT NULL, `oQueEvitar` TEXT NOT NULL, `comoExplicarMeuFuncionamento` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL, PRIMARY KEY(`situacaoId`), FOREIGN KEY(`situacaoId`) REFERENCES `situacao`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "situacaoId",
+            "columnName": "situacaoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "oQueDizerScripts",
+            "columnName": "oQueDizerScripts",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "oQueFazer",
+            "columnName": "oQueFazer",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "oQueEvitar",
+            "columnName": "oQueEvitar",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "comoExplicarMeuFuncionamento",
+            "columnName": "comoExplicarMeuFuncionamento",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "situacaoId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ponte_situacaoId",
+            "unique": false,
+            "columnNames": [
+              "situacaoId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ponte_situacaoId` ON `${TABLE_NAME}` (`situacaoId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "situacao",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "situacaoId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "relacao_tipo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `descricao` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_relacao_tipo_nome",
+            "unique": true,
+            "columnNames": [
+              "nome"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_relacao_tipo_nome` ON `${TABLE_NAME}` (`nome`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "resposta_relacionamento",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `relacaoTipo` TEXT NOT NULL, `subtema` TEXT NOT NULL, `perfilNdOuNt` TEXT NOT NULL, `texto` TEXT NOT NULL, `tom` TEXT NOT NULL, `tamanho` TEXT NOT NULL, `gatilhoDeUso` TEXT NOT NULL, `tags` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "relacaoTipo",
+            "columnName": "relacaoTipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "subtema",
+            "columnName": "subtema",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "perfilNdOuNt",
+            "columnName": "perfilNdOuNt",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "texto",
+            "columnName": "texto",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tom",
+            "columnName": "tom",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tamanho",
+            "columnName": "tamanho",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gatilhoDeUso",
+            "columnName": "gatilhoDeUso",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tags",
+            "columnName": "tags",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_resposta_relacionamento_relacaoTipo",
+            "unique": false,
+            "columnNames": [
+              "relacaoTipo"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_resposta_relacionamento_relacaoTipo` ON `${TABLE_NAME}` (`relacaoTipo`)"
+          },
+          {
+            "name": "index_resposta_relacionamento_subtema",
+            "unique": false,
+            "columnNames": [
+              "subtema"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_resposta_relacionamento_subtema` ON `${TABLE_NAME}` (`subtema`)"
+          },
+          {
+            "name": "index_resposta_relacionamento_perfilNdOuNt",
+            "unique": false,
+            "columnNames": [
+              "perfilNdOuNt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_resposta_relacionamento_perfilNdOuNt` ON `${TABLE_NAME}` (`perfilNdOuNt`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "emocao",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `descricao` TEXT NOT NULL, `sinaisCorporais` TEXT NOT NULL, `necessidadesComuns` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sinaisCorporais",
+            "columnName": "sinaisCorporais",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "necessidadesComuns",
+            "columnName": "necessidadesComuns",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "alexitimia_pistas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `pista` TEXT NOT NULL, `possivelEmocao` TEXT NOT NULL, `perguntaDeApoio` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pista",
+            "columnName": "pista",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "possivelEmocao",
+            "columnName": "possivelEmocao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "perguntaDeApoio",
+            "columnName": "perguntaDeApoio",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "sensorial_perfil",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `modalidade` TEXT NOT NULL, `padrao` TEXT NOT NULL, `descricao` TEXT NOT NULL, `estrategia` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modalidade",
+            "columnName": "modalidade",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "padrao",
+            "columnName": "padrao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estrategia",
+            "columnName": "estrategia",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "funcao_executiva_estrategia",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dominio` TEXT NOT NULL, `titulo` TEXT NOT NULL, `quandoUsar` TEXT NOT NULL, `passos` TEXT NOT NULL, `adaptacaoNd` TEXT NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dominio",
+            "columnName": "dominio",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "titulo",
+            "columnName": "titulo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "quandoUsar",
+            "columnName": "quandoUsar",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "passos",
+            "columnName": "passos",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "adaptacaoNd",
+            "columnName": "adaptacaoNd",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "perfil_usuario",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `preferenciasSensoriais` TEXT NOT NULL, `gatilhos` TEXT NOT NULL, `rotinas` TEXT NOT NULL, `energiaSocialAtual` TEXT NOT NULL, `preferenciasTom` TEXT NOT NULL, `modoRespostaPadrao` TEXT NOT NULL, `dataAtualizacao` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "preferenciasSensoriais",
+            "columnName": "preferenciasSensoriais",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gatilhos",
+            "columnName": "gatilhos",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rotinas",
+            "columnName": "rotinas",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "energiaSocialAtual",
+            "columnName": "energiaSocialAtual",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "preferenciasTom",
+            "columnName": "preferenciasTom",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modoRespostaPadrao",
+            "columnName": "modoRespostaPadrao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataAtualizacao",
+            "columnName": "dataAtualizacao",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "compromisso",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `titulo` TEXT NOT NULL, `descricao` TEXT NOT NULL, `dataHoraMillis` INTEGER, `local` TEXT NOT NULL, `tipo` TEXT NOT NULL, `concluido` INTEGER NOT NULL, `lembrete` INTEGER NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "titulo",
+            "columnName": "titulo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataHoraMillis",
+            "columnName": "dataHoraMillis",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "local",
+            "columnName": "local",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "concluido",
+            "columnName": "concluido",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lembrete",
+            "columnName": "lembrete",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "destaque_cognitivo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `texto` TEXT NOT NULL, `cor` TEXT NOT NULL, `categoria` TEXT NOT NULL, `origem` TEXT NOT NULL, `nota` TEXT NOT NULL, `concluido` INTEGER NOT NULL, `fonte` TEXT NOT NULL, `nivelConfianca` REAL NOT NULL, `dataGeracao` INTEGER NOT NULL, `revisado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "texto",
+            "columnName": "texto",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cor",
+            "columnName": "cor",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoria",
+            "columnName": "categoria",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "origem",
+            "columnName": "origem",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nota",
+            "columnName": "nota",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "concluido",
+            "columnName": "concluido",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fonte",
+            "columnName": "fonte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nivelConfianca",
+            "columnName": "nivelConfianca",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataGeracao",
+            "columnName": "dataGeracao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revisado",
+            "columnName": "revisado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '553a5142564d22c00cd5997bc3cd4c51')"
+    ]
+  }
+}

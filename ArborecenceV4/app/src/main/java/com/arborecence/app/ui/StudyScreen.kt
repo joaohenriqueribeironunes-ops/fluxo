@@ -51,7 +51,9 @@ fun StudyScreen(vm: StudyViewModel, modifier: Modifier = Modifier) {
             }
         }
         CognitiveOffloadSection()
-        Text("Em evolução: marca-texto 4 cores (lavanda/menta/âmbar/água), revisão espaçada, mapa de conexões, linhas do tempo, hiperfoco, foco curto (pomodoro adaptável), checklists de início de tarefa. Entrada por voz (STT offline) integrada ao descarregamento: em evolução.", style = MaterialTheme.typography.bodySmall)
+        TaskStartChecklist()
+        HyperfocusHint()
+        Text("Em evolução: revisão espaçada, mapa de conexões, linhas do tempo (com base nos bancos locais). Sem pomodoro.", style = MaterialTheme.typography.bodySmall)
         Spacer(Modifier.height(24.dp))
     }
 }

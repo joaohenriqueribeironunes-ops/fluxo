@@ -9,6 +9,8 @@ import androidx.room.Transaction
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.arborecence.databehavior.entity.AlexitimiaPista
+import com.arborecence.databehavior.entity.Compromisso
+import com.arborecence.databehavior.entity.DestaqueCognitivo
 import com.arborecence.databehavior.entity.Emocao
 import com.arborecence.databehavior.entity.FuncaoExecutivaEstrategia
 import com.arborecence.databehavior.entity.LeituraNd
@@ -62,4 +64,14 @@ interface BehaviorDao {
     suspend fun listSubtemas(relacao: String): List<String>
 
     @Query("SELECT * FROM perfil_usuario WHERE id = 1") suspend fun getPerfil(): PerfilUsuario?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun upsertCompromisso(e: Compromisso): Long
+    @Query("SELECT * FROM compromisso ORDER BY concluido ASC, COALESCE(dataHoraMillis, 9999999999999) ASC, id DESC")
+    suspend fun listCompromissos(): List<Compromisso>
+    @Query("UPDATE compromisso SET concluido = :v WHERE id = :id") suspend fun setCompromissoConcluido(id: Long, v: Boolean)
+    @Query("DELETE FROM compromisso WHERE id = :id") suspend fun deleteCompromisso(id: Long)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertDestaque(e: DestaqueCognitivo): Long
+    @Query("SELECT * FROM destaque_cognitivo ORDER BY id DESC LIMIT :limit") suspend fun listDestaques(limit: Int = 200): List<DestaqueCognitivo>
+    @Query("DELETE FROM destaque_cognitivo WHERE id = :id") suspend fun deleteDestaque(id: Long)
 }
