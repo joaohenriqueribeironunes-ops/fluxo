@@ -4,228 +4,118 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.rounded.EventNote
+import androidx.compose.material.icons.rounded.MenuBook
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lambda.app.ui.AccessibilitySettings
 import com.lambda.app.ui.AppPreferences
 import com.lambda.app.ui.BehaviorScreen
 import com.lambda.app.ui.BehaviorViewModel
+import com.lambda.app.ui.CommitmentsScreen
+import com.lambda.app.ui.CommitmentsViewModel
+import com.lambda.app.ui.SettingsScreen
+import com.lambda.app.ui.StudyScreen
+import com.lambda.app.ui.StudyViewModel
 import com.lambda.app.util.TtsHelper
+import com.lambda.coreui.design.AuroraBackdrop
+import com.lambda.coreui.design.DockItem
+import com.lambda.coreui.design.GlassDock
+import com.lambda.coreui.design.LocalGlassStyle
 import com.lambda.coreui.theme.LambdaTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @Inject lateinit var keyStore: GeminiKeyStore
-    @Inject lateinit var tester: GeminiConnectionTester
     @Inject lateinit var prefs: AppPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val openVoice = intent?.getBooleanExtra("open_voice", false) == true
         setContent {
-            val a11y by prefs.settings.collectAsState(initial = AccessibilitySettings())
+            val a11y by prefs.settings.collectAsStateWithLifecycle(initialValue = AccessibilitySettings())
             LambdaTheme(
                 lowStimulus = a11y.lowStimulus,
                 highContrast = a11y.highContrast,
                 reducedMotion = a11y.reducedMotion,
                 fontScale = a11y.fontScale,
             ) {
-                var showConnect by rememberSaveable { mutableStateOf(false) }
-                Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    if (showConnect) {
-                        ConnectGeminiScreen(
-                            initialKey = keyStore.getKey().orEmpty(),
-                            tester = tester,
-                            onSave = { key -> keyStore.saveKey(key) },
-                            onRevoke = { keyStore.revokeKey(); showConnect = true },
-                            onContinue = { showConnect = false },
-                        )
-                    } else {
-                        AppShell(onOpenGemini = { showConnect = true }, prefs = prefs, a11y = a11y)
-                    }
-                }
+                AppShell(a11y = a11y, prefs = prefs, startTab = if (openVoice) 1 else 0)
             }
         }
     }
 }
 
 @Composable
-private fun AppShell(onOpenGemini: () -> Unit, prefs: AppPreferences, a11y: AccessibilitySettings) {
-    var tab by rememberSaveable { mutableIntStateOf(0) }
-    val tabs = listOf("Tradutor", "Estudos", "Compromissos", "Ajustes")
-    val ctx = LocalContext.current
-    val tts = remember { TtsHelper(ctx) }
+private fun AppShell(a11y: AccessibilitySettings, prefs: AppPreferences, startTab: Int) {
+    var tab by rememberSaveable { mutableIntStateOf(startTab) }
+    val style = LocalGlassStyle.current
+    val appContext = LocalContext.current.applicationContext
+    val tts = remember { TtsHelper(appContext) }
     DisposableEffect(Unit) { onDispose { tts.shutdown() } }
     val speak: (String) -> Unit = { text -> tts.speak(text, enabled = !a11y.noUnexpectedSounds) }
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                tabs.forEachIndexed { i, label ->
-                    NavigationBarItem(
-                        selected = tab == i,
-                        onClick = { tab = i },
-                        icon = { Icon(when (i) { 0 -> Icons.Filled.Favorite; 1 -> Icons.Filled.Book; 2 -> Icons.Filled.Event; else -> Icons.Filled.Settings }, null) },
-                        label = { Text(label) },
-                    )
-                }
-            }
-        }
-    ) { pad ->
-        when (tab) {
-            0 -> { val vm: BehaviorViewModel = hiltViewModel(); BehaviorScreen(vm, Modifier.padding(pad), onSpeak = speak) }
-            1 -> { val vm: com.lambda.app.ui.StudyViewModel = hiltViewModel(); com.lambda.app.ui.StudyScreen(vm, Modifier.padding(pad)) }
-            2 -> { val vm: com.lambda.app.ui.CommitmentsViewModel = hiltViewModel(); com.lambda.app.ui.CommitmentsScreen(vm, Modifier.padding(pad)) }
-            else -> SettingsScreen(Modifier.padding(pad), onOpenGemini = onOpenGemini, prefs = prefs, a11y = a11y)
-        }
-    }
-}
 
-@Composable
-private fun StudiesPlaceholder(modifier: Modifier = Modifier) {
-    Column(modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Central de estudos (offline)", style = MaterialTheme.typography.headlineSmall)
-        Text("Busca e navegação em áreas, subáreas, conceitos, frases explicativas e etimologia (quando os bancos locais estiverem populados).", style = MaterialTheme.typography.bodyMedium)
-        Text("Recursos em evolução: revisão espaçada e linhas do tempo. Já disponíveis: marca-texto (lavanda/menta/âmbar/água), modo hiperfoco e checklists de início de tarefa.", style = MaterialTheme.typography.bodySmall)
-    }
-}
-
-@Composable
-private fun SettingsScreen(modifier: Modifier = Modifier, onOpenGemini: () -> Unit, prefs: AppPreferences, a11y: AccessibilitySettings) {
-    val scope = rememberCoroutineScope()
-    Column(modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("Ajustes", style = MaterialTheme.typography.headlineSmall)
-        Text("Modo offline ativo: o app não depende de API para funcionar. Gemini é opcional.", style = MaterialTheme.typography.bodyMedium)
-        OutlinedButton(onClick = onOpenGemini) { Text("Conectar / trocar / revogar Gemini (opcional)") }
-
-        Text("Acessibilidade neurodivergente", style = MaterialTheme.typography.titleSmall)
-        A11yToggle("Baixo estímulo (reduz efeitos visuais)", a11y.lowStimulus) { scope.launch { prefs.setLowStimulus(it) } }
-        A11yToggle("Alto contraste", a11y.highContrast) { scope.launch { prefs.setHighContrast(it) } }
-        A11yToggle("Movimento reduzido (sem animações desnecessárias)", a11y.reducedMotion) { scope.launch { prefs.setReducedMotion(it) } }
-        A11yToggle("Sem sons inesperados", a11y.noUnexpectedSounds) { scope.launch { prefs.setNoUnexpectedSounds(it) } }
-        Text("Tamanho da fonte: ${"%.2f".format(a11y.fontScale)}x", style = MaterialTheme.typography.bodySmall)
-        androidx.compose.material3.Slider(
-            value = a11y.fontScale,
-            onValueChange = { scope.launch { prefs.setFontScale(it) } },
-            valueRange = 0.85f..1.5f,
+    val dock = remember {
+        listOf(
+            DockItem("Tradutor", Icons.Rounded.Translate),
+            DockItem("Estudos", Icons.Rounded.MenuBook),
+            DockItem("Agenda", Icons.Rounded.EventNote),
+            DockItem("Ajustes", Icons.Rounded.Settings),
         )
-        Text("Navegação previsível e sem piscadas: mantida por padrão.", style = MaterialTheme.typography.bodySmall)
-
-        Text("Apoio e segurança", style = MaterialTheme.typography.titleSmall)
-        Text("Este app é apoio, não substitui profissional. Sem diagnóstico, sem dose de medicamento, sem plano alimentar prescritivo. ND não é “errado” e NT não é “vilão”: foco em tradução e autonomia.", style = MaterialTheme.typography.bodySmall)
-        androidx.compose.material3.ElevatedCard(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Se houver risco imediato ou crise", style = MaterialTheme.typography.titleSmall)
-                Text("CVV 188 — apoio emocional 24h (ligação gratuita).", style = MaterialTheme.typography.bodyMedium)
-                Text("SAMU 192 — emergência médica.", style = MaterialTheme.typography.bodyMedium)
-                Text("Procure também pessoas de confiança. (Configuração de contatos de confiança: em evolução.)", style = MaterialTheme.typography.bodySmall)
-            }
-        }
-
-        com.lambda.app.ui.LearnedSection()
-        Text("Privacidade e dados", style = MaterialTheme.typography.titleSmall)
-        Text("Local por padrão, sem telemetria. A chave Gemini (se usada) fica criptografada no aparelho.", style = MaterialTheme.typography.bodySmall)
-        com.lambda.app.ui.BackupSection()
-        Text("Sobre o conteúdo", style = MaterialTheme.typography.titleSmall)
-        Text("Respostas mostram fonte e nível de confiança. ND e NT são leituras diferentes (tradução), sem certo/errado.", style = MaterialTheme.typography.bodySmall)
     }
-}
 
-@Composable
-private fun A11yToggle(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    androidx.compose.material3.ListItem(
-        headlineContent = { Text(label) },
-        trailingContent = { androidx.compose.material3.Switch(checked = checked, onCheckedChange = onChange) },
-    )
-}
-
-@Composable
-fun ConnectGeminiScreen(
-    initialKey: String,
-    tester: GeminiConnectionTester,
-    onSave: (String) -> Unit,
-    onRevoke: () -> Unit,
-    onContinue: () -> Unit,
-) {
-    var key by remember { mutableStateOf(initialKey) }
-    var testing by remember { mutableStateOf(false) }
-    var status by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
-    val snackbar = remember { SnackbarHostState() }
-    LaunchedEffect(status) { status?.let { snackbar.showSnackbar(it) } }
-    Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { pad ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(pad).padding(24.dp).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(stringResource(R.string.connect_gemini_title), style = MaterialTheme.typography.headlineSmall)
-            Text("Opcional. O app funciona 100% offline sem chave. Se conectar, a chave fica criptografada só neste aparelho.", style = MaterialTheme.typography.bodyMedium)
-            OutlinedTextField(value = key, onValueChange = { key = it }, modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.api_key_label)) }, singleLine = true, visualTransformation = PasswordVisualTransformation())
-            Button(onClick = { if (key.isBlank()) { status = "Cole uma chave ou use offline."; return@Button }; onSave(key); status = "Chave salva com segurança." },
-                modifier = Modifier.fillMaxWidth(), enabled = !testing) { Text(stringResource(R.string.save_key)) }
-            OutlinedButton(onClick = {
-                scope.launch {
-                    testing = true; status = null
-                    status = when (val res = tester.test(key)) {
-                        GeminiTestResult.Success -> "Conexão OK."
-                        is GeminiTestResult.Failure -> res.message
+    Box(Modifier.fillMaxSize()) {
+        AuroraBackdrop(Modifier.fillMaxSize(), style)
+        Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)) {
+            Crossfade(
+                targetState = tab,
+                animationSpec = tween(if (style.reducedMotion) 0 else 260),
+                label = "tab",
+            ) { current ->
+                when (current) {
+                    0 -> {
+                        val vm: BehaviorViewModel = hiltViewModel()
+                        BehaviorScreen(vm, onSpeak = speak)
                     }
-                    testing = false
+                    1 -> {
+                        val vm: StudyViewModel = hiltViewModel()
+                        StudyScreen(vm)
+                    }
+                    2 -> {
+                        val vm: CommitmentsViewModel = hiltViewModel()
+                        CommitmentsScreen(vm)
+                    }
+                    else -> SettingsScreen(a11y = a11y, prefs = prefs)
                 }
-            }, modifier = Modifier.fillMaxWidth(), enabled = !testing && key.isNotBlank()) {
-                if (testing) CircularProgressIndicator(modifier = Modifier.height(18.dp), strokeWidth = 2.dp) else Text(stringResource(R.string.test_connection))
             }
-            TextButton(onClick = { key = ""; onRevoke(); status = "Chave apagada." }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.revoke_key)) }
-            Spacer(Modifier.height(8.dp))
-            Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.continue_label)) }
-            TextButton(onClick = onContinue, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text(stringResource(R.string.skip_for_now)) }
         }
+        GlassDock(
+            items = dock,
+            selected = tab,
+            onSelect = { tab = it },
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
     }
 }

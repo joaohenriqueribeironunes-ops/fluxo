@@ -23,7 +23,8 @@ def _load_schema(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 def _exec_schema_sql(con: sqlite3.Connection, sql: str, table_name: str):
-    sql = sql.replace("${TABLE_NAME}", f"`{table_name}`").replace("${VIEW_NAME}", f"`{table_name}`")
+    # Room templates já envolvem o placeholder em crases (`${TABLE_NAME}`); inserir o nome puro.
+    sql = sql.replace("${TABLE_NAME}", table_name).replace("${VIEW_NAME}", table_name)
     con.execute(sql)
 
 def _apply_room_schema(con: sqlite3.Connection, schema: dict):
@@ -59,6 +60,43 @@ def create_academic_db(path: Path) -> sqlite3.Connection:
     con.commit()
     return con
 
+def insert_situacao(con: sqlite3.Connection, s: dict) -> int:
+    """Insere uma situação curada completa: situação + leitura ND + leitura NT + ponte."""
+    data = s.get("dataGeracao", 0)
+    fonte = s.get("fonte", "catálogo curado Lambda")
+    conf = s.get("nivelConfianca", 0.72)
+    con.execute(
+        """INSERT INTO situacao (categoria, titulo, descricao, contextoAmbiente, fonte, nivelConfianca, dataGeracao, revisado)
+        VALUES (?,?,?,?,?,?,?,1)""",
+        (s["categoria"], s["titulo"], s["descricao"], s["contextoAmbiente"], fonte, conf, data),
+    )
+    sid = con.execute("SELECT last_insert_rowid()").fetchone()[0]
+    nd = s["nd"]
+    con.execute(
+        """INSERT INTO leitura_nd (situacaoId, percepcaoSensorial, interpretacaoLiteral, emocaoProvavel,
+        cargaCognitiva, sinalDeSobrecarga, estrategiaDeRegulacao, fonte, nivelConfianca, dataGeracao, revisado)
+        VALUES (?,?,?,?,?,?,?,?,?,?,1)""",
+        (sid, nd["percepcaoSensorial"], nd["interpretacaoLiteral"], nd["emocaoProvavel"],
+         nd["cargaCognitiva"], nd["sinalDeSobrecarga"], nd["estrategiaDeRegulacao"], fonte, conf, data),
+    )
+    nt = s["nt"]
+    con.execute(
+        """INSERT INTO leitura_nt (situacaoId, intencaoProvavel, expectativaSocialImplicita,
+        comoInterpretaOComportamentoNd, malEntendidoComum, fonte, nivelConfianca, dataGeracao, revisado)
+        VALUES (?,?,?,?,?,?,?,?,1)""",
+        (sid, nt["intencaoProvavel"], nt["expectativaSocialImplicita"],
+         nt["comoInterpretaOComportamentoNd"], nt["malEntendidoComum"], fonte, conf, data),
+    )
+    p = s["ponte"]
+    con.execute(
+        """INSERT INTO ponte (situacaoId, oQueDizerScripts, oQueFazer, oQueEvitar,
+        comoExplicarMeuFuncionamento, fonte, nivelConfianca, dataGeracao, revisado)
+        VALUES (?,?,?,?,?,?,?,?,1)""",
+        (sid, p["oQueDizerScripts"], p["oQueFazer"], p["oQueEvitar"],
+         p["comoExplicarMeuFuncionamento"], fonte, conf, data),
+    )
+    return sid
+
 def insert_resposta(con: sqlite3.Connection, r: dict):
     con.execute(
         """INSERT INTO resposta_relacionamento
@@ -85,7 +123,7 @@ def ensure_subarea(con: sqlite3.Connection, area_id: int, nome: str, cache: dict
     row = con.execute("SELECT id FROM subarea WHERE areaId=? AND nome=?", (area_id, nome)).fetchone()
     if row:
         cache[key] = row[0]; return row[0]
-    con.execute("INSERT INTO subarea (areaId, nome, descricao, fonte, nivelConfianca, dataGeracao, revisado) VALUES (?,?,?,?,?,0)",
+    con.execute("INSERT INTO subarea (areaId, nome, descricao, fonte, nivelConfianca, dataGeracao, revisado) VALUES (?,?,?,?,?,?,0)",
                 (area_id, nome, "", "seed", 1.0, 0))
     rid = con.execute("SELECT id FROM subarea WHERE areaId=? AND nome=?", (area_id, nome)).fetchone()[0]
     cache[key] = rid; return rid

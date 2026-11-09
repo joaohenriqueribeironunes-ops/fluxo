@@ -20,6 +20,7 @@ import com.lambda.dataacademic.entity.Glossario
 import com.lambda.dataacademic.entity.NormaTecnica
 import com.lambda.dataacademic.entity.Referencia
 import com.lambda.dataacademic.entity.Subarea
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AcademicDao {
@@ -39,7 +40,9 @@ interface AcademicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertReferencia(e: Referencia): Long
 
     @Query("SELECT COUNT(*) FROM frase_explicativa") suspend fun countFrases(): Int
+    @Query("SELECT COUNT(*) FROM frase_explicativa") fun countFrasesFlow(): Flow<Int>
     @Query("SELECT COUNT(*) FROM etimologia") suspend fun countEtimologias(): Int
+    @Query("SELECT COUNT(*) FROM etimologia") fun countEtimologiasFlow(): Flow<Int>
     @Query("SELECT COUNT(DISTINCT subareaId) FROM frase_explicativa") suspend fun countSubareasComFrases(): Int
     @Query("SELECT * FROM area ORDER BY nome") suspend fun listAreas(): List<Area>
     @Query("SELECT * FROM subarea WHERE areaId = :areaId ORDER BY nome") suspend fun listSubareas(areaId: Long): List<Subarea>

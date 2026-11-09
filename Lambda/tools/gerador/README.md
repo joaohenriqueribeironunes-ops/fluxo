@@ -1,42 +1,34 @@
-# Gerador (FASE 2)
+# Gerador local (sem API, sem IA)
 
-Pipeline de geração em massa (Gemini → SQLite compatível com Room). A chave é lida **somente** de `Lambda/local.properties` (`GEMINI_API_KEY=...`) — **nunca** é logada/exibida/commitada.
+Este diretório contém o seed determinístico dos bancos do Lambda. **Nenhuma chamada de rede, nenhuma chave e nenhum modelo de linguagem** são usados.
 
-## O que faz
-- Lotes por subtema (comportamento) e subárea (acadêmico), prompts estruturados, saída **JSON validada/parseada**.
-- **Retentativas com backoff** exponencial e **limite de RPM** (padrão conservador).
-- **Checkpoint** retomável em `.checkpoints/` (interrompeu? rode de novo).
-- **Estimativa de chamadas/custo** e **confirmação obrigatória** antes de consumir API (`SIM` interativo, ou `--yes` após revisar `--estimate-only`).
-- **Qualidade**: deduplicação por cosseno < 0,85, tamanho mínimo, `revisado=false`, relatório em `reports/` (cobertura + sinalizações leves).
-- **Segurança** (conteúdo sensível: saúde/nutrição/farmacocinética/relações abusivas): informativo, **sem diagnóstico, sem dose, sem plano prescritivo**; farmacocinética só conceitos gerais ADME; indica apoio profissional/canais seguros quando pertinente.
-- **Empacota** `behavior.db`/`academic.db` em `app/src/main/assets/` (prontos para uso offline).
-
-## Instalação
-```powershell
-cd Lambda
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r tools/gerador/requirements.txt
-```
+## Arquivos principais
+- `situacoes_curadas.py` — catálogo escrito e revisado manualmente com 40 situações humanas detalhadas (amizade, amor, família, trabalho, colegas, vizinhos, desconhecidos e atendimento). Cada uma tem leitura ND, leitura NT e ponte prática.
+- `content_plan.py` — relações, subtemas, perfis e áreas acadêmicas.
+- `seed_local.py` — monta `behavior.db` e `academic.db` a partir do catálogo e de templates com variação determinística.
+- `db_writer.py` — cria o schema compatível com Room, tabelas FTS5 e inserções (incluindo situação + leituras + ponte).
+- `quality.py` — limpeza de texto e detecção de quase-duplicatas por cosseno (< 0,85).
+- `../verificar_volume.py` — audita as metas e falha com código 1 se algo estiver abaixo.
 
 ## Uso
 ```powershell
-# 1) Ver estimativa (sem consumir API)
-python tools/gerador/gerar.py --estimate-only --target all
-
-# 2) Gerar (pede confirmação "SIM")
-python tools/gerador/gerar.py --target all
-# opções: --target behavior|academic|all  --rpm 10  --model gemini-1.5-flash  --no-assets  --yes
-```
-
-## Saídas
-- `tools/gerador/out/behavior.db`, `out/academic.db`
-- `app/src/main/assets/*.db` (copiados, exceto com `--no-assets`)
-- `tools/gerador/reports/COBERTURA_GERADA.md` e `cobertura.json`
-- `tools/gerador/.checkpoints/` (retomada)
-
-## Validar metas
-```powershell
+cd Lambda
+python tools/gerador/seed_local.py              # gera os dois bancos e copia para assets
+python tools/gerador/seed_local.py --only behavior
+python tools/gerador/seed_local.py --only academic
 python tools/verificar_volume.py
 ```
-(behavior ≥ 3000 distintas, equilíbrio ND/NT e relações; academic ≥ 2500, ≥ 50/subárea).
+
+## Metas verificadas
+- `behavior.db`: ≥ 3.000 respostas distintas, com deduplicação pelo contexto real (`relacaoTipo + subtema + perfilNdOuNt`); ≥ 40 situações detalhadas com leitura ND, leitura NT e ponte completas.
+- `academic.db`: ≥ 2.500 frases explicativas distintas, ≥ 50 por subárea (58 subáreas) e ≥ 300 etimologias.
+
+## Saídas
+- `tools/gerador/out/behavior.db` e `out/academic.db`
+- `app/src/main/assets/*.db` (cópia automática)
+
+## Princípios de qualidade
+- PT-BR literal, sem julgamento e sem diagnóstico.
+- ND e NT são leituras hipotéticas, não verdades sobre pessoas.
+- Conteúdo sensível é informativo; farmacocinética só em conceitos gerais (sem dose).
+- Quando houver risco imediato, o app orienta CVV 188 / SAMU 192.

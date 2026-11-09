@@ -6,12 +6,23 @@ import com.lambda.aiengine.AiEngine
 import com.lambda.aiengine.AiRequest
 import com.lambda.aiengine.AiResult
 import com.lambda.databehavior.dao.BehaviorDao
+import com.lambda.databehavior.entity.LeituraNd
+import com.lambda.databehavior.entity.LeituraNt
+import com.lambda.databehavior.entity.Ponte
+import com.lambda.databehavior.entity.Situacao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class SituacaoAberta(
+    val situacao: Situacao,
+    val nd: LeituraNd?,
+    val nt: LeituraNt?,
+    val ponte: Ponte?,
+)
 
 data class BehaviorUiState(
     val query: String = "",
@@ -24,6 +35,8 @@ data class BehaviorUiState(
     val resultNt: AiResult? = null,
     val error: String? = null,
     val dbCount: Int? = null,
+    val situacoes: List<Situacao> = emptyList(),
+    val situacaoAberta: SituacaoAberta? = null,
 )
 
 @HiltViewModel
@@ -42,13 +55,37 @@ class BehaviorViewModel @Inject constructor(
                 dbCount = count,
                 relacoes = if (rels.isNotEmpty()) rels else _state.value.relacoes,
             )
+            loadSituacoes(_state.value.relacao)
         }
     }
 
     fun onQueryChange(v: String) { _state.value = _state.value.copy(query = v) }
     fun onVisaoChange(v: AiEngine.Visao) { _state.value = _state.value.copy(visao = v) }
     fun onModoChange(v: AiEngine.Modo) { _state.value = _state.value.copy(modo = v) }
-    fun onRelacaoChange(v: String) { _state.value = _state.value.copy(relacao = v) }
+
+    fun onRelacaoChange(v: String) {
+        _state.value = _state.value.copy(relacao = v, situacaoAberta = null)
+        loadSituacoes(v)
+    }
+
+    private fun loadSituacoes(relacao: String) {
+        viewModelScope.launch {
+            val list = runCatching { behaviorDao.listSituacoesPorCategoria(relacao) }.getOrDefault(emptyList())
+            _state.value = _state.value.copy(situacoes = list)
+        }
+    }
+
+    fun abrirSituacao(id: Long) {
+        viewModelScope.launch {
+            val s = runCatching { behaviorDao.getSituacao(id) }.getOrNull() ?: return@launch
+            val nd = runCatching { behaviorDao.getLeituraNd(id) }.getOrNull()
+            val nt = runCatching { behaviorDao.getLeituraNt(id) }.getOrNull()
+            val ponte = runCatching { behaviorDao.getPonte(id) }.getOrNull()
+            _state.value = _state.value.copy(situacaoAberta = SituacaoAberta(s, nd, nt, ponte))
+        }
+    }
+
+    fun fecharSituacao() { _state.value = _state.value.copy(situacaoAberta = null) }
 
     fun ask(both: Boolean = true) {
         val q = state.value.query.trim()

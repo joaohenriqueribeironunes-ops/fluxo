@@ -76,15 +76,34 @@ def check_behavior(path: str | None):
     try:
         cur = con.execute("SELECT id, relacaoTipo, subtema, perfilNdOuNt, texto FROM resposta_relacionamento")
         rows = [dict(r) for r in cur.fetchall()]
+        situacoes = con.execute("SELECT COUNT(*) FROM situacao").fetchone()[0]
+        nd_ok = con.execute("SELECT COUNT(*) FROM leitura_nd").fetchone()[0]
+        nt_ok = con.execute("SELECT COUNT(*) FROM leitura_nt").fetchone()[0]
+        pontes = con.execute("SELECT COUNT(*) FROM ponte").fetchone()[0]
     except Exception as e:
-        print(f"FALHA: não foi possível ler resposta_relacionamento: {e}")
+        print(f"FALHA: não foi possível ler as tabelas de behavior: {e}")
         return False
     finally:
         con.close()
-    total, distinct, dups = dedup_texts(rows, "texto", "subtema")
-    print(f"Total: {total} | Distintas (cosseno<{COSINE_MAX} no subtema): {distinct} | Quase-duplicatas: {dups}")
+
+    # O contexto real é relação + subtema + perfil; comparar apenas por subtema
+    # mistura as 8 relações e infla artificialmente as quase-duplicatas.
+    for r in rows:
+        r["celula"] = f"{r.get('relacaoTipo') or '?'}|{r.get('subtema') or '?'}|{r.get('perfilNdOuNt') or '?'}"
+    total, distinct, dups = dedup_texts(rows, "texto", "celula")
+    print(f"Total: {total} | Distintas (cosseno<{COSINE_MAX} por relação+subtema+perfil): {distinct} | Quase-duplicatas: {dups}")
+    exact = Counter((r.get("texto") or "").strip().lower() for r in rows)
+    exact_dups = sum(v - 1 for v in exact.values() if v > 1)
+    print(f"Duplicatas exatas globais: {exact_dups} | Células: {len({r['celula'] for r in rows})}")
     if distinct < 3000:
         print(f"FALHA: meta >= 3000 respostas distintas; encontrado {distinct}.")
+        ok = False
+    print(f"Situações curadas: {situacoes} (leitura ND: {nd_ok}, NT: {nt_ok}, pontes: {pontes})")
+    if situacoes < 40:
+        print(f"FALHA: meta >= 40 situações detalhadas; encontrado {situacoes}.")
+        ok = False
+    if nd_ok < situacoes or nt_ok < situacoes or pontes < situacoes:
+        print("FALHA: há situações sem leitura ND, leitura NT ou ponte completa.")
         ok = False
     nd = sum(1 for r in rows if (r.get('perfilNdOuNt') or '').upper() == 'ND')
     nt = sum(1 for r in rows if (r.get('perfilNdOuNt') or '').upper() == 'NT')

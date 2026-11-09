@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
-    <exclude domain="sharedpref" path="secure_gemini_prefs.xml" />
-    <exclude domain="database" path="behavior.db" />
-    <exclude domain="database" path="academic.db" />
+    <!-- Backup padrão do Android: inclui dados locais do usuário (compromissos, destaques e preferências). -->
 </full-backup-content>

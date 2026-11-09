@@ -20,8 +20,10 @@ if str(HERE) not in sys.path:
 from config import ASSETS_DIR
 from content_plan import RELACAO_DB, SUBTEMAS_COMPORTAMENTO, PERFIS, ACADEMIC_AREAS, ETIMOLOGIA_ALVO
 from quality import clean_text, is_near_dup, now_ms
-from db_writer import (create_behavior_db, create_academic_db, insert_resposta, seed_relacao_tipos,
-                        ensure_area, ensure_subarea, ensure_conceito, insert_frase, insert_etimologia)
+from db_writer import (create_behavior_db, create_academic_db, insert_resposta, insert_situacao,
+                        seed_relacao_tipos, ensure_area, ensure_subarea, ensure_conceito, insert_frase,
+                        insert_etimologia)
+from situacoes_curadas import SITUACOES
 
 OUT = HERE / "out"
 
@@ -46,6 +48,8 @@ ND_FRAMES = [
     ("clareza", "Pedir informação literal e específica reduz adivinhação e cansaço."),
     ("energia", "Seu limite de energia social é real. Planejar pausas protege você."),
     ("script", "Ter uma frase pronta diminui a pressão de responder na hora."),
+    ("sensorial", "Detalhes de som, luz, cheiro ou toque podem pesar mais do que parecem para quem observa de fora."),
+    ("processamento", "Levar tempo para entender e responder não é falta de interesse; é o seu ritmo de processamento."),
 ]
 NT_FRAMES = [
     ("intenção", "A pessoa pode estar comunicando uma intenção indireta, além das palavras literais."),
@@ -54,6 +58,8 @@ NT_FRAMES = [
     ("mal-entendido", "Mal-entendidos aqui costumam vir de estilos diferentes, não de falta de cuidado."),
     ("contexto", "O contexto (lugar, hierarquia, urgência) muda o que parece adequado para quem observa."),
     ("ajuste", "Explicar seu jeito de forma simples pode ajudar a outra pessoa a calibrar expectativas."),
+    ("recíproca", "A leitura NT também é uma hipótese: vale checar com a pessoa antes de tratar como certeza."),
+    ("ritmo", "Pessoas diferentes precisam de prazos e formatos diferentes para responder com qualidade."),
 ]
 
 SIZES = ["curto", "padrao", "detalhado"]
@@ -143,6 +149,10 @@ def build_behavior_text(rel_db, subtema, perfil, idx):
         "Seu bem-estar sensorial e emocional importa na decisão.",
         "Uma explicação curta do seu funcionamento pode prevenir atrito.",
         "Depois de regular, fica mais fácil retomar o assunto com clareza.",
+        "Nomear o limite antes de ele virar explosão é uma forma de cuidado.",
+        "Você não precisa performar conforto que não sente para manter o vínculo.",
+        "Uma pausa curta pode evitar uma resposta da qual você se arrependa.",
+        "Pedir o que precisa, com exemplos concretos, reduz a chance de mal-entendido.",
     ]
     suffixes_nt = [
         "Perguntar com respeito costuma funcionar melhor do que concluir.",
@@ -151,20 +161,34 @@ def build_behavior_text(rel_db, subtema, perfil, idx):
         "Nem todo silêncio significa desinteresse; pode ser pausa ou processamento.",
         "Regras ditas com clareza reduzem mal-entendidos.",
         "Flexibilidade no formato (texto, tempo, pausa) melhora a troca.",
+        "Checar a interpretação antes de reagir evita escalar o conflito.",
+        "Uma pergunta curta costuma esclarecer mais do que uma suposição longa.",
+        "Reconhecer o esforço da outra pessoa também é parte da conversa.",
+        "Combinar o próximo passo, mesmo pequeno, diminui a insegurança dos dois lados.",
     ]
-    suf = (suffixes_nd if perfil == "ND" else suffixes_nt)[idx % 6]
+    suf = (suffixes_nd if perfil == "ND" else suffixes_nt)[idx % 10]
     if tamanho != "curto":
         texto = f"{texto} {suf}"
-    # micro-variação extra por hash para manter cosseno baixo
+    # micro-variação extra para manter cosseno baixo dentro da mesma célula
     variants = ["", " Priorize passos pequenos e concretos.", " Se útil, escreva sua frase antes de falar.",
-                " Combine sinais simples para pausa.", " Reavalie depois com mais calma.", " Foque no próximo passo possível."]
+                " Combine sinais simples para pausa.", " Reavalie depois com mais calma.", " Foque no próximo passo possível.",
+                " Use exemplos específicos em vez de rótulos.", " Anote o combinado para não depender da memória.",
+                " Se o assunto for delicado, escolha um momento calmo.", " Deixe claro o que está sob seu controle."]
     texto = clean_text(texto + variants[idx % len(variants)])
     return {"texto": texto, "tom": "caloroso e direto", "tamanho": tamanho, "gatilhoDeUso": gatilho, "tags": tags,
             "fonte": "seed-local", "nivelConfianca": 0.72, "dataGeracao": now_ms()}
 
-def generate_behavior_local(out_db: Path, alvo_por_celula: int = 6):
+def generate_behavior_local(out_db: Path, alvo_por_celula: int = 8):
     con = create_behavior_db(out_db)
     seed_relacao_tipos(con)
+    # Catálogo curado manualmente: situações detalhadas com leitura ND, leitura NT e ponte.
+    n_situacoes = 0
+    for s in SITUACOES:
+        rec = dict(s)
+        rec["dataGeracao"] = now_ms()
+        insert_situacao(con, rec)
+        n_situacoes += 1
+    con.commit()
     existing = defaultdict(list)
     for row in con.execute("SELECT relacaoTipo, subtema, perfilNdOuNt, texto FROM resposta_relacionamento"):
         existing[(row[0],row[1],row[2])].append(row[3])
@@ -187,36 +211,398 @@ def generate_behavior_local(out_db: Path, alvo_por_celula: int = 6):
                     con.commit(); print(f"[behavior] {inserted} inseridas...")
         con.commit(); print(f"[behavior] relação concluída: {rel_db}")
     con.commit(); con.close()
-    print(f"[behavior] pronto: {inserted} inseridas, {dups} quase-duplicatas evitadas. DB: {out_db}")
-    return inserted
+    print(f"[behavior] pronto: {inserted} respostas, {dups} quase-duplicatas evitadas, "
+          f"{n_situacoes} situações curadas. DB: {out_db}")
+    return inserted, n_situacoes
 
 # --- acadêmico: frases por subárea com ângulos ---
 ANGULOS = ["definição","analogia","exemplo cotidiano","causa e efeito","erro comum","curiosidade","conexão com outra área","versão visual","versão para hiperfoco","versão curta e direta"]
 
+# Fatos concretos por subárea (curadoria manual, sem IA). Servem de âncora para
+# as frases explicativas e evitam texto genérico repetido.
+SUB_EXEMPLOS = {
+    "Sistema Solar": [
+        "os planetas orbitam o Sol em trajetórias elípticas",
+        "a luz do Sol leva cerca de oito minutos para chegar à Terra",
+        "as distâncias são medidas em unidades astronômicas",
+    ],
+    "Estrelas e evolução estelar": [
+        "estrelas se formam em nuvens de gás e poeira",
+        "a sequência principal é uma etapa de queima de hidrogênio",
+        "a massa da estrela influencia seu tempo de vida",
+    ],
+    "Gravitação e relatividade": [
+        "massas curvam o espaço-tempo e orientam órbitas",
+        "relógios em altitudes diferentes marcam tempos ligeiramente distintos",
+        "a gravidade também é descrita como geometria do espaço-tempo",
+    ],
+    "Cosmologia observacional": [
+        "a expansão do universo afasta galáxias umas das outras",
+        "a radiação cósmica de fundo é um registro antigo do universo",
+        "o desvio para o vermelho indica afastamento entre fontes",
+    ],
+    "Método científico": [
+        "uma hipótese precisa ser testável e falsificável",
+        "variáveis de controle ajudam a isolar o efeito estudado",
+        "replicar um resultado aumenta a confiança na conclusão",
+    ],
+    "Matéria e energia na natureza": [
+        "energia se conserva e muda de forma",
+        "a matéria pode existir em estados sólido, líquido e gasoso",
+        "ciclos naturais conectam matéria e energia no ambiente",
+    ],
+    "Mecânica clássica": [
+        "a inércia mantém o movimento quando não há força resultante",
+        "força e aceleração se relacionam pela massa",
+        "ação e reação ocorrem em pares",
+    ],
+    "Eletricidade e magnetismo": [
+        "cargas em movimento geram campos magnéticos",
+        "circuitos organizam caminhos para a corrente elétrica",
+        "a indução transforma variação magnética em corrente",
+    ],
+    "Geometria e formas": [
+        "figuras geométricas têm propriedades mensuráveis",
+        "simetria ajuda a reconhecer padrões e igualdades",
+        "área e perímetro descrevem dimensões diferentes",
+    ],
+    "Gráficos e padrões visuais": [
+        "eixos e escalas definem como um gráfico deve ser lido",
+        "tendências aparecem quando comparamos pontos ao longo do tempo",
+        "a escolha do gráfico muda a leitura dos dados",
+    ],
+    "Lógica proposicional": [
+        "conectivos como 'e', 'ou' e 'se... então' combinam proposições",
+        "a tabela-verdade mostra todos os valores possíveis",
+        "a validade depende da estrutura, não do conteúdo",
+    ],
+    "Conjuntos e demonstrações": [
+        "pertinência indica se um elemento faz parte de um conjunto",
+        "união e interseção combinam conjuntos de formas diferentes",
+        "a prova por absurdo supõe o contrário e busca contradição",
+    ],
+    "Estrutura atômica e ligações": [
+        "prótons, nêutrons e elétrons formam os átomos",
+        "ligações iônicas e covalentes distribuem elétrons de modos distintos",
+        "a tabela periódica organiza propriedades dos elementos",
+    ],
+    "Reações e equilíbrio": [
+        "reagentes se transformam em produtos com troca de energia",
+        "a energia de ativação influencia a velocidade da reação",
+        "o equilíbrio responde a mudanças de concentração e temperatura",
+    ],
+    "Célula e genética": [
+        "o DNA carrega instruções para o funcionamento da célula",
+        "mitose e meiose distribuem material genético de formas diferentes",
+        "a expressão gênica depende do contexto celular",
+    ],
+    "Ecologia e evolução": [
+        "a seleção natural favorece traços em determinado ambiente",
+        "cadeias alimentares mostram fluxo de energia entre seres vivos",
+        "biodiversidade sustenta a estabilidade dos ecossistemas",
+    ],
+    "Rochas e ciclo geológico": [
+        "rochas magmáticas, sedimentares e metamórficas têm origens distintas",
+        "intemperismo e erosão transformam materiais ao longo do tempo",
+        "o ciclo das rochas conecta processos internos e externos",
+    ],
+    "Tectônica de placas": [
+        "placas litosféricas se movem sobre o manto",
+        "terremotos e vulcões se concentram em limites de placas",
+        "a deriva continental explica semelhanças entre continentes",
+    ],
+    "Atmosfera e tempo": [
+        "pressão, temperatura e umidade descrevem o estado da atmosfera",
+        "frentes frias e quentes mudam as condições do tempo",
+        "previsões usam modelos e observações em conjunto",
+    ],
+    "Clima e fenômenos extremos": [
+        "clima é um padrão de longo prazo; tempo é o estado momentâneo",
+        "El Niño e La Niña alteram padrões de chuva e temperatura",
+        "eventos extremos ganham força em certos contextos climáticos",
+    ],
+    "Sintaxe e interpretação": [
+        "sujeito e predicado organizam a estrutura da oração",
+        "períodos compostos conectam ideias por coordenação ou subordinação",
+        "interpretar exige relacionar o texto com seu contexto",
+    ],
+    "Semântica e coesão": [
+        "o sentido das palavras muda conforme o contexto",
+        "conectivos articulam ideias e sinalizam relações",
+        "ambiguidade surge quando mais de uma leitura é possível",
+    ],
+    "Gramática essencial": [
+        "tempos verbais situam ações no tempo",
+        "a ordem das palavras afeta a estrutura da frase",
+        "artigos e preposições ajudam a marcar relações",
+    ],
+    "Vocabulário e pragmática": [
+        "o uso real da língua depende de contexto e intenção",
+        "registro formal e informal mudam escolhas de palavras",
+        "expressões idiomáticas não se traduzem ao pé da letra",
+    ],
+    "Ética e argumento": [
+        "argumentos têm premissas e conclusão",
+        "falácias parecem válidas, mas têm falhas de raciocínio",
+        "juízos morais podem ser examinados com razões e consequências",
+    ],
+    "Epistemologia": [
+        "conhecimento envolve crença, verdade e justificação",
+        "o ceticismo questiona o que podemos afirmar com segurança",
+        "evidências ajudam a distinguir opinião de conhecimento",
+    ],
+    "Cognição e emoção": [
+        "atenção, memória e emoção interagem no processamento",
+        "vieses influenciam julgamentos sem percebermos",
+        "regular a emoção ajuda a tomar decisões mais claras",
+    ],
+    "Comportamento e aprendizagem": [
+        "reforço e punição moldam padrões de comportamento",
+        "hábitos se formam com repetição e contexto",
+        "aprendizagem envolve prática, erro e ajuste",
+    ],
+    "Normas e instituições": [
+        "normas sociais orientam expectativas de convivência",
+        "instituições distribuem poder e recursos",
+        "regras formais e informais coexistem",
+    ],
+    "Identidade e grupos": [
+        "pertencimento a grupos influencia identidade",
+        "estereótipos simplificam e distorcem diferenças",
+        "socialização transmite valores e práticas",
+    ],
+    "Experiência subjetiva e intensidade": [
+        "intensidade emocional varia entre pessoas e contextos",
+        "sensibilidade alta pode ampliar detalhes percebidos",
+        "experiência interna não é sempre visível de fora",
+    ],
+    "Assincronia e sobre-excitabilidades": [
+        "desenvolvimento pode ser desigual entre áreas",
+        "sobre-excitabilidade intensifica respostas a estímulos",
+        "contexto e apoio mudam o impacto da assincronia",
+    ],
+    "Neurodesenvolvimento e evidências": [
+        "variações neurobiológicas fazem parte do desenvolvimento",
+        "critérios e evidências orientam avaliações responsáveis",
+        "diagnóstico não define o valor de uma pessoa",
+    ],
+    "Vivência, suporte e autonomia": [
+        "acessibilidade reduz barreiras desnecessárias",
+        "rotinas previsíveis podem diminuir sobrecarga",
+        "autoadvocacia é saber pedir o que precisa",
+    ],
+    "Neurônios e sinapses": [
+        "neurônios transmitem sinais por sinapses",
+        "neurotransmissores modulam a comunicação entre células",
+        "plasticidade permite mudanças nas conexões",
+    ],
+    "Circuitos e plasticidade": [
+        "redes neurais processam informações em paralelo",
+        "aprendizagem fortalece ou enfraquece conexões",
+        "o cérebro se reorganiza com experiência e lesões",
+    ],
+    "Potenciais e transmissão": [
+        "o potencial de ação é um sinal elétrico breve",
+        "despolarização e repolarização mudam a carga da membrana",
+        "a transmissão sináptica converte sinal elétrico em químico",
+    ],
+    "Sistemas sensório-motores": [
+        "entradas sensoriais são integradas antes da resposta motora",
+        "controle motor envolve planejamento e ajuste contínuo",
+        "feedback sensorial corrige movimentos em tempo real",
+    ],
+    "Estruturas cerebrais": [
+        "córtex, sistema límbico e tronco têm funções complementares",
+        "estruturas se conectam em circuitos, não trabalham isoladas",
+        "lesões mostram que função depende de redes",
+    ],
+    "Vias e conexões anatômicas": [
+        "tratos nervosos conduzem sinais entre regiões",
+        "vias aferentes levam informação; eferentes levam comandos",
+        "mapear conexões ajuda a entender sintomas",
+    ],
+    "Eixos corpo-cérebro": [
+        "o eixo intestino-cérebro conecta digestão e sistema nervoso",
+        "hormônios e inflamação influenciam o cérebro",
+        "corpo e mente se regulam mutuamente",
+    ],
+    "Homeostase e integração": [
+        "homeostase mantém condições internas estáveis",
+        "feedback negativo corrige desvios",
+        "sistemas integrados ajustam funções em conjunto",
+    ],
+    "Causalidade histórica": [
+        "eventos históricos têm causas múltiplas",
+        "contexto econômico, social e político se entrelaça",
+        "consequências podem aparecer muito depois das causas",
+    ],
+    "Leitura de linhas do tempo": [
+        "a ordem dos eventos ajuda a entender processos",
+        "escalas diferentes mostram ritmos diferentes",
+        "periodização organiza o tempo histórico",
+    ],
+    "Luz, composição e intenção": [
+        "luz e sombra definem volume e clima da imagem",
+        "enquadramento orienta o olhar de quem vê",
+        "intenção comunicativa guia escolhas de composição",
+    ],
+    "Narrativa visual": [
+        "sequência de imagens constrói uma história",
+        "ponto de vista muda a interpretação da cena",
+        "edição organiza ritmo e ênfase",
+    ],
+    "Princípios de design": [
+        "hierarquia visual mostra o que é mais importante",
+        "contraste separa elementos e melhora leitura",
+        "alinhamento e espaçamento criam organização",
+    ],
+    "Forma, função e espaço": [
+        "forma e função se condicionam mutuamente",
+        "escala humana orienta conforto e uso",
+        "circulação organiza o percurso no espaço",
+    ],
+    "Microrganismos e métodos": [
+        "bactérias, vírus e fungos têm estruturas distintas",
+        "meios de cultura permitem estudar microrganismos",
+        "microscopia revela o que não é visível a olho nu",
+    ],
+    "Fungos e ecologia microbiana": [
+        "fungos atuam na decomposição de matéria orgânica",
+        "micorrizas conectam fungos e raízes de plantas",
+        "fermentação é usada em alimentos e biocombustíveis",
+    ],
+    "Nutrientes e metabolismo (conceitos)": [
+        "macronutrientes fornecem energia e material de construção",
+        "micronutrientes participam de reações em pequenas quantidades",
+        "metabolismo converte nutrientes em energia utilizável",
+    ],
+    "Padrões alimentares e evidências": [
+        "padrões alimentares descrevem conjuntos de escolhas ao longo do tempo",
+        "estudos observacionais e ensaios têm limites diferentes",
+        "evidências mudam com novas pesquisas",
+    ],
+    "ADME: absorção, distribuição, metabolismo e excreção": [
+        "absorção leva a substância ao sangue",
+        "distribuição e metabolismo modificam sua presença no corpo",
+        "excreção encerra o ciclo de permanência",
+    ],
+    "Variabilidade, interações e limites (sem dose)": [
+        "respostas variam entre pessoas e contextos",
+        "interações podem alterar efeitos de substâncias",
+        "informação geral não substitui orientação profissional",
+    ],
+    "ABNT NBR 6023/10520/14724": [
+        "referências seguem uma ordem padronizada de elementos",
+        "citações indicam autoria e ano no texto",
+        "formatação de trabalhos segue normas específicas",
+    ],
+    "APA, Vancouver, ISO e normas industriais": [
+        "estilos de citação diferem em ordem e pontuação",
+        "normas técnicas padronizam processos e produtos",
+        "o estilo escolhido deve ser mantido em todo o trabalho",
+    ],
+    "Raízes greco-latinas": [
+        "radicais gregos e latinos formam termos científicos",
+        "prefixos e sufixos modificam o sentido da raiz",
+        "composição erudita cria palavras novas",
+    ],
+    "Mudança semântica e fonética": [
+        "palavras mudam de sentido ao longo do tempo",
+        "empréstimos linguísticos adaptam sons e grafias",
+        "fonética estuda os sons da fala",
+    ],
+}
+
+ABERTURAS = [
+    "Para começar, ", "Em termos claros, ", "De forma direta, ", "Pense assim: ", "Um jeito simples de ver: ",
+    "Na prática, ", "Sem complicar: ", "Do ponto de vista de quem estuda, ", "Uma boa porta de entrada é: ",
+    "Resumindo o essencial: ",
+]
+FECHAMENTOS = [
+    "Isso ajuda a estudar sem pular etapas.",
+    "Nomear os termos com calma reduz confusão.",
+    "Um bom próximo passo é escrever sua própria explicação em uma frase.",
+    "Relacionar com algo que você já conhece ajuda a fixar o conceito.",
+    "Se ficar abstrato, volte ao exemplo concreto e avance devagar.",
+    "Revisar depois de um tempo fortalece a memória do tema.",
+    "Comparar com um contraexemplo esclarece o limite da ideia.",
+    "Transformar a explicação em pergunta ajuda a testar o entendimento.",
+    "Anotar em tópicos curtos facilita a revisão posterior.",
+    "Uma dúvida bem formulada vale mais do que uma resposta decorada.",
+]
+ANGULO_BASES = {
+    "definição": [
+        "{sub} é um conjunto de ideias e conceitos usado para entender {sub_low} de forma organizada.",
+        "{sub} pode ser definido como o estudo dos elementos e relações que explicam {sub_low}.",
+        "Chamamos de {sub} o campo que descreve como {sub_low} funciona e se organiza.",
+    ],
+    "analogia": [
+        "Pense em {sub} como um mapa: não é o lugar real, mas ajuda a se localizar em {sub_low}.",
+        "Uma analogia útil para {sub}: imagine peças de um quebra-cabeça que só fazem sentido juntas.",
+        "{sub} funciona como uma lente de aumento: destaca detalhes de {sub_low} que passariam despercebidos.",
+    ],
+    "exemplo cotidiano": [
+        "No dia a dia, {sub} aparece quando você observa um problema concreto e tenta explicá-lo passo a passo.",
+        "Um exemplo de {sub} é descrever o que aconteceu, por que aconteceu e o que mudou em seguida.",
+        "Outro exemplo: ao planejar uma tarefa simples, você usa raciocínio de {sub} sem perceber.",
+    ],
+    "causa e efeito": [
+        "Em {sub}, causa e efeito significam ligar um fator a um resultado com cuidado.",
+        "Pergunta útil em {sub}: o que veio antes, o que mudou e há outra explicação possível?",
+        "Correlação não prova causa em {sub}; é preciso verificar mecanismos e alternativas.",
+    ],
+    "erro comum": [
+        "Erro comum em {sub}: aceitar uma explicação rápida sem verificar evidências ou definições.",
+        "Em {sub}, confundir opinião com fato é um tropeço frequente.",
+        "Outro erro em {sub}: decorar termos sem entender como eles se conectam.",
+    ],
+    "curiosidade": [
+        "Curiosidade sobre {sub}: muitos avanços surgem quando alguém transforma uma dúvida confusa em pergunta clara.",
+        "Em {sub}, a história mostra que revisar o óbvio costuma abrir novas descobertas.",
+        "Um detalhe curioso de {sub}: modelos simples às vezes explicam mais do que parece.",
+    ],
+    "conexão com outra área": [
+        "{sub} se conecta a outras áreas quando um mesmo fenômeno pode ser visto por ângulos diferentes.",
+        "A ponte entre {sub} e outras áreas aparece na comparação de métodos e linguagens.",
+        "Entender {sub} ajuda a interpretar problemas de áreas vizinhas.",
+    ],
+    "versão visual": [
+        "Versão visual: imagine {sub} como caixas conectadas por setas, cada uma com uma relação diferente.",
+        "Visualmente, {sub} pode ser um fluxograma: entradas, processos e resultados.",
+        "Um esquema útil de {sub}: uma tabela com termos à esquerda e exemplos à direita.",
+    ],
+    "versão para hiperfoco": [
+        "Versão para hiperfoco: escolha 1 pergunta central de {sub}, liste 3 conceitos-chave, 2 exemplos e 1 contraexemplo.",
+        "No hiperfoco, aprofunde {sub} em camadas: defina, exemplifique, compare e teste um limite.",
+        "Recorte de {sub} para hiperfoco: 1 termo, 2 relações, 1 aplicação e 1 dúvida em aberto.",
+    ],
+    "versão curta e direta": [
+        "{sub}: entenda o conceito, veja um exemplo e teste com uma pergunta clara.",
+        "{sub} em resumo: ideia central, exemplo concreto e limite da validade.",
+        "Para lembrar {sub}: definição curta, aplicação prática e uma pergunta de checagem.",
+    ],
+}
+
+MEIOS = [
+    " Um ponto concreto: {ex}.",
+    " Vale ancorar em um exemplo: {ex}.",
+    " Para tornar isso tangível: {ex}.",
+    " Um caso real ajuda a fixar: {ex}.",
+    " Exemplo direto: {ex}.",
+]
+
 def build_academic_text(area, subarea, angulo, idx):
-    base = {
-        "definição": f"{subarea} ({area}): é o conjunto de ideias e conceitos usados para entender {subarea.lower()} de forma organizada. Em termos simples, responde “o que é” e “como reconhecer”.",
-        "analogia": f"Pense em {subarea} como um mapa: o mapa não é o lugar real, mas ajuda você a se localizar. Na área de {area}, essa analogia mostra como os conceitos guiam decisões.",
-        "exemplo cotidiano": f"No dia a dia, {subarea} aparece quando você observa um problema concreto e tenta explicá-lo passo a passo. Um exemplo simples: descrever o que aconteceu, por que aconteceu e o que mudou em seguida.",
-        "causa e efeito": f"Em {subarea}, causa e efeito significam ligar um fator a um resultado com cuidado. Pergunta útil: “o que veio antes, o que mudou, e há outra explicação possível?”.",
-        "erro comum": f"Erro comum em {subarea}: aceitar uma explicação rápida sem verificar evidências ou definições. Como evitar: separar fato, interpretação e opinião, e checar um exemplo real.",
-        "curiosidade": f"Curiosidade sobre {subarea}: muitos avanços surgem quando alguém transforma uma dúvida confusa em uma pergunta clara e testável — isso vale muito em {area}.",
-        "conexão com outra área": f"{subarea} se conecta a outras áreas quando um mesmo fenômeno pode ser visto por ângulos diferentes (por exemplo, dados, contexto humano e método). Essa ponte ajuda a entender melhor.",
-        "versão visual": f"Versão visual: imagine {subarea} como caixas conectadas por setas. Cada caixa é um conceito e cada seta mostra uma relação (causa, parte-todo ou sequência) dentro de {area}.",
-        "versão para hiperfoco": f"Versão para hiperfoco: escolha 1 pergunta central de {subarea}, liste 3 conceitos-chave, 2 exemplos e 1 contraexemplo. Aprofunde só nesse recorte por um tempo combinado.",
-        "versão curta e direta": f"{subarea}: entenda o conceito, veja um exemplo e teste com uma pergunta clara. Esse é o núcleo em {area}.",
-    }
-    t = base.get(angulo, base["definição"])
-    extras = [
-        f" Isso ajuda a estudar {subarea.lower()} sem pular etapas.",
-        f" Em {area}, nomear os termos com calma reduz confusão.",
-        f" Um bom próximo passo é escrever sua própria explicação em uma frase.",
-        f" Relacione com algo que você já conhece para fixar o conceito.",
-        f" Se ficar abstrato, volte ao exemplo concreto e avance devagar.",
-        f" Revisar depois de um tempo fortalece a memória do tema.",
-    ]
-    t = clean_text(t + extras[idx % len(extras)] + ("" if idx < 6 else f" (foco {idx+1})."))
-    return {"angulo": angulo, "texto": t, "fonte": "seed-local", "nivelConfianca": 0.68, "dataGeracao": now_ms()}
+    bases = ANGULO_BASES.get(angulo, ANGULO_BASES["definição"])
+    bloco = idx // len(ANGULOS)  # 0..4: cada ângulo ganha 5 variações
+    base = bases[bloco % len(bases)]
+    exemplo_list = SUB_EXEMPLOS.get(subarea, [f"os conceitos centrais de {subarea.lower()}"])
+    exemplo = exemplo_list[bloco % len(exemplo_list)]
+    abertura = ABERTURAS[(bloco * 2 + len(subarea)) % len(ABERTURAS)]
+    fechamento = FECHAMENTOS[(bloco * 3 + len(area)) % len(FECHAMENTOS)]
+    corpo = base.format(sub=subarea, sub_low=subarea.lower())
+    meio = MEIOS[bloco % len(MEIOS)].format(ex=exemplo)
+    t = clean_text(f"{abertura}{corpo}{meio} {fechamento} (Área: {area}.)")
+    return {"angulo": angulo, "texto": t, "fonte": "seed-local", "nivelConfianca": 0.70, "dataGeracao": now_ms()}
 
 def generate_academic_local(out_db: Path):
     con = create_academic_db(out_db)
@@ -231,7 +617,7 @@ def generate_academic_local(out_db: Path):
             sub_id = ensure_subarea(con, area_id, sub.nome, sub_cache)
             conc_id = ensure_conceito(con, sub_id, f"Fundamentos de {sub.nome}", conc_cache)
             idx = 0
-            while len(existing[sub_id]) < 50 and idx < 200:
+            while len(existing[sub_id]) < 50 and idx < 400:
                 ang = ANGULOS[idx % len(ANGULOS)]
                 rec = build_academic_text(area.nome, sub.nome, ang, idx)
                 idx += 1
@@ -242,7 +628,7 @@ def generate_academic_local(out_db: Path):
             con.commit()
             print(f"[academic] {area.nome} / {sub.nome}: {len(existing[sub_id])}")
     # etimologia (curada, >=300) - gerada por composição de raízes comuns
-    inserted_et = generate_etimology_local(con)
+    inserted_et = generate_etymology_local(con)
     con.commit(); con.close()
     print(f"[academic] pronto: {inserted} frases, {dups} dups evitadas, {inserted_et} etimologias. DB: {out_db}")
     return inserted, inserted_et
